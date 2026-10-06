@@ -2,6 +2,8 @@
 name: docs
 description: Redator técnico. Escreve e mantém README, guias de uso, documentação de API e documentação de arquitetura com base no que foi entregue.
 model: sonnet
+effort: low
+maxTurns: 40
 tools: Read, Glob, Grep, Write, Edit, Bash, WebFetch, Skill
 skills:
   - delivery-contract

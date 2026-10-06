@@ -7,13 +7,18 @@
 !/agents/
 !/skills/
 !/hooks/
+!/bin/
+/bin/*
+!/bin/team-init
 /hooks/*
 !/hooks/team-context.py
+!/hooks/compact-bash.py
+!/hooks/compact-output.py
 
 # Skills: só as da equipe
 /skills/*
 !/skills/delivery-contract/
-!/skills/prd-template/
+!/skills/spec-workflow/
 !/skills/git-conventions/
 !/skills/deploy-checklist/
 !/skills/backend-standards/

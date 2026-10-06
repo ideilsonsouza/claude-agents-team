@@ -2,6 +2,8 @@
 name: pr
 description: Dono de git e GitHub. Revisa o diff, organiza commits, cria branches, abre e revisa Pull Requests via gh. Único agente que faz commit e push.
 model: sonnet
+effort: low
+maxTurns: 30
 tools: Read, Glob, Grep, Bash, Skill
 skills:
   - delivery-contract

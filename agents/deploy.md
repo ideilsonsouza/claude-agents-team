@@ -2,6 +2,8 @@
 name: deploy
 description: Responsável por release. Executa deploys, verifica a saúde pós-deploy e faz rollback. Não edita pipelines nem código. Produção sempre exige confirmação do usuário.
 model: sonnet
+effort: low
+maxTurns: 30
 tools: Read, Glob, Grep, Bash, Skill
 skills:
   - delivery-contract

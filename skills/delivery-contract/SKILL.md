@@ -11,6 +11,21 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 - **Não** varra diretórios inteiros nem releia o projeto para "entender o contexto". Não revalide o que o briefing já afirma.
 - Precisa saber se algo já existe? Consulte `progress.md` na base antes de procurar no código.
 
+## Fontes de verdade (anti-alucinação)
+Ordem de confiança — use a mais alta disponível e **nunca** a memória do modelo quando uma fonte melhor existe:
+1. **Código e configuração do projeto** (o que está escrito agora).
+2. **Versão instalada** das dependências (`go.mod`/`go.sum`, `package.json` + lockfile, tipos em `node_modules`, `go doc`).
+3. **Documentação oficial da versão em uso** (`WebFetch`, quando você tiver a ferramenta).
+4. Skills da equipe.
+5. Memória do modelo — só para o que não pode ser verificado, e marcado como suposição.
+
+Regras:
+- **Não invente** APIs, flags, opções de config, nomes de arquivo, rotas ou colunas. Antes de usar, confirme que existe (busca no código ou na dependência instalada).
+- Toda afirmação factual no relatório tem evidência: `arquivo:linha`, saída de comando ou link de doc.
+- Não sabe ou não conseguiu verificar? Escreva **"não verificado"** ou pergunte. Suposição explícita é aceitável; suposição silenciosa não.
+- Requisito ambíguo → pare e liste a dúvida no relatório (status BLOQUEADO) em vez de escolher uma interpretação sozinho.
+- Rode o comando de verificação do critério de pronto **antes** de reportar. Reporte o resultado real, inclusive falhas.
+
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
 - Notas, planos, rascunhos, relatórios, scripts temporários e logs da equipe **nunca** vão para o repositório. Temporários: diretório de scratchpad da sessão (ou `/tmp`). Material que deve durar: a base do projeto (`~/.claude/team-state/<slug>/`).

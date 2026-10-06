@@ -19,7 +19,8 @@ Os nomes seguem padrões de mercado: **steering files do Kiro** (`product.md`, `
 | `progress.md` | Estado: o que já foi entregue (onde está, endpoints, tabelas), o que está em andamento, problemas conhecidos | orchestrator, prd | resumo, não changelog |
 | `backlog.md` | Próximos passos, riscos, dívidas técnicas, perguntas em aberto | orchestrator | lista viva |
 | `history.md` | Uma linha por entrega: `AAAA-MM-DD · agente(s) · resumo` | ninguém (consulta) | só acrescenta |
-| `prd/`, `adr/`, `architecture/` | Artefatos da equipe quando a política for **internal** | sob demanda | — |
+| `specs/<data>-<feature>/` | `requirements.md`, `design.md`, `tasks.md` (skill `spec-workflow`); entregues vão para `specs/_archive/` | sob demanda | — |
+| `adr/`, `architecture/` | ADRs e docs de arquitetura quando a política for **internal** | sob demanda | — |
 
 Se um arquivo passar de uma ou duas páginas, mova o detalhe para um arquivo à parte na base e deixe um link.
 
@@ -56,8 +57,8 @@ Pastas principais com uma linha de comentário cada (só o que ajuda a localizar
 ## Convenções de nomes
 ## Artefatos da equipe
 Política: internal | repo
-- internal → PRDs, ADRs e docs de arquitetura em `<base>/prd`, `<base>/adr`, `<base>/architecture`
-- repo → em `docs/prd`, `docs/adr`, `docs/architecture` do projeto
+- internal → specs, ADRs e docs de arquitetura em `<base>/specs`, `<base>/adr`, `<base>/architecture`
+- repo → em `docs/specs`, `docs/adr`, `docs/architecture` do projeto
 ```
 
 ### `progress.md`
