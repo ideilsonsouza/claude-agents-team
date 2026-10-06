@@ -6,10 +6,10 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 # Contrato de entrega
 
 ## Antes de começar: leitura enxuta
-- O **mapa do projeto** já está no seu contexto (injetado pelo hook). Use-o para localizar código em vez de explorar.
+- Os arquivos da base relevantes ao seu papel (`tech.md`, `structure.md`, ...) já estão no seu contexto, injetados pelo hook. Use-os para localizar código em vez de explorar.
 - Leia os arquivos citados no briefing. Para o resto, busca dirigida (`Grep`/`Glob` por símbolo, rota ou nome), e abra só o trecho necessário.
 - **Não** varra diretórios inteiros nem releia o projeto para "entender o contexto". Não revalide o que o briefing já afirma.
-- Precisa saber se algo já existe? Consulte `implemented.md` na base antes de procurar no código.
+- Precisa saber se algo já existe? Consulte `progress.md` na base antes de procurar no código.
 
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
@@ -40,7 +40,7 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - O que ficou de fora, o que pode quebrar, perguntas em aberto.
 
 ## Atualização da base
-- O que muda no mapa/implementado (módulo novo, endpoint, tabela, comando, convenção). "Nenhuma" se não mudou nada.
+- O que muda em cada arquivo da base: `progress.md` (o que foi entregue), `structure.md` (pasta/módulo novo), `tech.md` (dependência, comando, convenção), `backlog.md` (pendências). "Nenhuma" se não mudou nada.
 
 ## Próximo passo sugerido
 - Qual agente deveria agir a seguir e com qual objetivo.

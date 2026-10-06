@@ -5,7 +5,7 @@ description: Estrutura padrão de PRD (Product Requirements Document) com histó
 
 # Template de PRD
 
-Salve em `<pasta de PRDs>/AAAA-MM-DD-<slug>.md` — `<base>/prd/` ou `docs/prd/`, conforme a política de artefatos do mapa.
+Salve em `<pasta de PRDs>/AAAA-MM-DD-<slug>.md` — `<base>/prd/` ou `docs/prd/`, conforme a política de artefatos do `structure.md`.
 
 ```markdown
 # <Nome da feature>

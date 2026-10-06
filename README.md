@@ -47,9 +47,19 @@ echo "alias team='claude --agent orchestrator'" >> ~/.zshrc
 ```
 
 ## Base de conhecimento por projeto
-Fica **fora do repositório**, em `~/.claude/team-state/<slug>/` (`map.md`, `implemented.md`, `backlog.md`, `history.md` e, se a política for interna, `prd/`, `adr/`, `architecture/`). O `<slug>` vem do repositório principal, então é o mesmo em todos os worktrees.
+Fica **fora do repositório**, em `~/.claude/team-state/<slug>/`, com nomes de mercado:
 
-O hook `hooks/team-context.py`, declarado no frontmatter do orchestrator, injeta a base no orchestrator (`SessionStart`) e o mapa em cada especialista (`SubagentStart`). Assim ninguém relê o projeto para saber o que já existe. Não é versionado (contém dados de projetos).
+| Arquivo | Origem | Conteúdo |
+|---|---|---|
+| `product.md` | Kiro steering | Visão, usuários, funcionalidades, regras de negócio |
+| `tech.md` | Kiro steering | Stack, comandos, convenções técnicas |
+| `structure.md` | Kiro steering | Pastas, módulos, política de artefatos |
+| `progress.md` | Cline Memory Bank | O que foi entregue, em andamento, problemas |
+| `backlog.md` | — | Pendências, riscos, dívidas |
+| `history.md` | — | Uma linha por entrega |
+| `prd/`, `adr/`, `architecture/` | — | Artefatos quando a política é `internal` |
+
+O `<slug>` vem do repositório principal, então é o mesmo em todos os worktrees. O hook `hooks/team-context.py` (no frontmatter do orchestrator) injeta tudo no orchestrator (`SessionStart`) e, em cada especialista (`SubagentStart`), só os arquivos do papel dele. Não é versionado (contém dados de projetos).
 
 ## Memória
 Todos os agentes têm `memory: user` (em `~/.claude/agent-memory/`, não versionado). A memória concede `Write`/`Edit` automaticamente; no orchestrator e no deploy o prompt restringe essas ferramentas à pasta de memória.

@@ -1,14 +1,31 @@
 #!/usr/bin/env python3
 """Injeta a base de conhecimento do projeto (fora do repositório) no contexto da equipe.
 
-SessionStart (orchestrator): mapa + implementado + pendências.
-SubagentStart (especialistas): mapa + caminho da base.
+Nomes de arquivo seguem o mercado: steering do Kiro (product/tech/structure)
+e Memory Bank do Cline (progress), mais backlog e history.
+
+SessionStart (orchestrator): todos os arquivos de steering + progress + backlog.
+SubagentStart (especialistas): só os arquivos relevantes ao papel.
 Base: ~/.claude/team-state/<slug>/, onde <slug> vem do repositório principal
 (estável entre worktrees, como os do Orca).
 """
 import hashlib, json, pathlib, re, subprocess, sys
 
-TEAM = {"architect", "prd", "dba", "backend", "frontend", "qa", "docs", "pr", "devops", "deploy"}
+STEERING = ("product.md", "tech.md", "structure.md")
+
+# Arquivos injetados em cada especialista. O resto ele lê sob demanda.
+POR_AGENTE = {
+    "architect": ("product.md", "tech.md", "structure.md"),
+    "prd": ("product.md", "progress.md"),
+    "dba": ("tech.md", "structure.md"),
+    "backend": ("tech.md", "structure.md"),
+    "frontend": ("tech.md", "structure.md"),
+    "qa": ("tech.md", "structure.md"),
+    "docs": ("product.md", "tech.md", "structure.md"),
+    "pr": ("tech.md",),
+    "devops": ("tech.md", "structure.md"),
+    "deploy": ("tech.md",),
+}
 LIMITE = 12000
 
 
@@ -35,35 +52,35 @@ def ler(arquivo: pathlib.Path) -> str:
     return texto if len(texto) <= LIMITE else texto[:LIMITE] + "\n\n[... truncado; leia o arquivo completo se precisar]"
 
 
+def secoes(base: pathlib.Path, nomes) -> list[str]:
+    return [f"## {nome}\n{conteudo}" for nome in nomes if (conteudo := ler(base / nome))]
+
+
 def main() -> None:
     dados = json.load(sys.stdin)
     evento = dados.get("hook_event_name")
     agente = dados.get("agent_type") or ""
     raiz = raiz_projeto(dados.get("cwd") or ".")
     base = pathlib.Path.home() / ".claude" / "team-state" / slug(raiz)
+    cabecalho = f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}"
 
     if evento == "SessionStart" and agente == "orchestrator":
         base.mkdir(parents=True, exist_ok=True)
-        partes = [f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase: {base}"]
-        mapa = ler(base / "map.md")
-        if not mapa:
-            partes.append("**Projeto ainda sem mapa.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
+        partes = [cabecalho]
+        if not any((base / n).exists() for n in STEERING):
+            partes.append("**Projeto ainda sem base.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
                           f"(skill `knowledge-base`), gravando em {base}.")
         else:
-            partes.append("## map.md\n" + mapa)
-            for nome in ("implemented.md", "backlog.md"):
-                conteudo = ler(base / nome)
-                if conteudo:
-                    partes.append(f"## {nome}\n{conteudo}")
-        contexto = "\n\n".join(partes)
-    elif evento == "SubagentStart" and agente in TEAM:
-        mapa = ler(base / "map.md") or "(projeto ainda sem mapa)"
-        contexto = (f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}\n"
-                    "Use este mapa antes de explorar o código. O que já foi entregue está em "
-                    f"{base}/implemented.md — leia só se o briefing não bastar.\n\n## map.md\n{mapa}")
+            partes += secoes(base, (*STEERING, "progress.md", "backlog.md"))
+    elif evento == "SubagentStart" and agente in POR_AGENTE:
+        corpo = secoes(base, POR_AGENTE[agente]) or ["(projeto ainda sem base)"]
+        partes = [cabecalho + "\nUse estes arquivos antes de explorar o código. Outros arquivos da base "
+                  "(product, tech, structure, progress, backlog) estão no caminho acima — leia só se o briefing não bastar.",
+                  *corpo]
     else:
         return
 
+    contexto = "\n\n".join(partes)
     print(json.dumps({"hookSpecificOutput": {"hookEventName": evento, "additionalContext": contexto}}, ensure_ascii=False))
 
 
