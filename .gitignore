@@ -14,11 +14,13 @@
 !/hooks/team-context.py
 !/hooks/compact-bash.py
 !/hooks/compact-output.py
+!/hooks/qmd-reindex.py
 
 # Skills: só as da equipe
 /skills/*
 !/skills/delivery-contract/
 !/skills/spec-workflow/
+!/skills/team-memory/
 !/skills/git-conventions/
 !/skills/deploy-checklist/
 !/skills/backend-standards/

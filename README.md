@@ -84,12 +84,26 @@ Fora do repositório, em `~/.claude/team-state/<slug>/` (o slug vem do repositó
 
 Política de artefatos por projeto (`structure.md`): `internal` (padrão, fora do repo) ou `repo` (em `docs/`). README e docs de API ficam sempre no repositório.
 
+## RAG — memória da equipe e documentação externa
+
+Decisão: **sem RAG vetorial sobre o código.** A Anthropic trocou RAG por busca agêntica no Claude Code (melhor resultado, sem índice desatualizado). Código = base do projeto + busca dirigida + LSP. RAG só onde rende:
+
+| Fonte | Ferramenta | Quem usa | Para quê |
+|---|---|---|---|
+| Memória da equipe (`team-state` de todos os projetos + `agent-memory`) | **qmd** (local, MIT; BM25 + vetorial + rerank) | orchestrator, architect, prd, dba | Reaproveitar ADRs, specs e critérios; não repetir erros |
+| Documentação de bibliotecas na versão instalada | **Context7** (MCP MIT; envia só nome da lib e a pergunta) | architect, dba, backend, frontend, qa, devops | Anti-alucinação de API/versão (fonte de verdade nº 3) |
+
+- Regras de consulta na skill `team-memory`: **sub-consultas tipadas** (`lex:` / `vec:`), no máximo 2 buscas por decisão. Texto livre dispara expansão por LLM local (~1–2 min nesta CPU); `lex` ≈ 0,2 s, `vec` ≈ segundos.
+- Reindexação automática em segundo plano (`hooks/qmd-reindex.py`): ao iniciar a sessão, quando o orchestrator escreve na base e quando um especialista termina.
+- backend, frontend, qa e devops não acessam o qmd (economia); recebem o necessário pelo briefing.
+
 ## Skills
 
 | Skill | Pré-carregada em |
 |---|---|
 | delivery-contract | todos os especialistas |
 | spec-workflow | orchestrator, prd, architect |
+| team-memory | orchestrator, architect, prd, dba |
 | adr-template | architect |
 | knowledge-base | docs |
 | sql-standards | dba |
@@ -112,8 +126,18 @@ cat >> ~/.zshrc <<'Z'
 alias team='claude --agent orchestrator'
 alias team-init='~/.claude/bin/team-init'
 Z
+
+# RAG
+npm install -g @tobilu/qmd --allow-scripts=node-llama-cpp,tree-sitter-go,tree-sitter-python,tree-sitter-rust,tree-sitter-typescript,tree-sitter-javascript
+mkdir -p ~/.claude/team-state ~/.claude/agent-memory
+qmd collection add ~/.claude/team-state --name team-state --mask "**/*.md"
+qmd collection add ~/.claude/agent-memory --name agent-memory --mask "**/*.md"
+qmd pull            # ~2 GB de modelos locais
+claude mcp add --scope user qmd -- qmd mcp
+claude mcp add --scope user context7 -- npx -y @upstash/context7-mcp
 ```
 
 ## Próximos passos planejados
 - **Camada 1 de tokens:** plugins LSP oficiais (`gopls-lsp`, `typescript-lsp`), ccusage, avaliar rtk.
-- **RAG e fine-tuning:** a discutir.
+- **MCPs por agente:** a discutir (inclui restringir conectores claude.ai herdados pelos especialistas).
+- Fine-tuning: descartado (indisponível para Opus/Sonnet no Claude Code e desnecessário).

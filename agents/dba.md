@@ -8,6 +8,7 @@ disallowedTools: Agent
 skills:
   - delivery-contract
   - sql-standards
+  - team-memory
 memory: user
 color: blue
 hooks:

@@ -4,7 +4,7 @@ description: Engenheiro de qualidade. Define estratégia de testes, escreve test
 model: sonnet
 effort: medium
 maxTurns: 50
-disallowedTools: Agent
+disallowedTools: Agent, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get, mcp__qmd__status
 skills:
   - delivery-contract
 memory: user

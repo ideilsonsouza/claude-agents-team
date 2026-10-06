@@ -15,7 +15,7 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 Ordem de confiança — use a mais alta disponível e **nunca** a memória do modelo quando uma fonte melhor existe:
 1. **Código e configuração do projeto** (o que está escrito agora).
 2. **Versão instalada** das dependências (`go.mod`/`go.sum`, `package.json` + lockfile, tipos em `node_modules`, `go doc`).
-3. **Documentação oficial da versão em uso** (`WebFetch`, quando você tiver a ferramenta).
+3. **Documentação oficial da versão em uso**: Context7 primeiro (`mcp__context7__resolve-library-id` → `mcp__context7__query-docs`, informando a versão instalada); `WebFetch` na doc oficial se o Context7 não tiver a biblioteca. Uma consulta focada por dúvida, não por precaução.
 4. Skills da equipe.
 5. Memória do modelo — só para o que não pode ser verificado, e marcado como suposição.
 

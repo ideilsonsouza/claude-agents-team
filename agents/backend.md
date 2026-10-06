@@ -4,7 +4,7 @@ description: Desenvolvedor backend (Go, Fastify, AdonisJS). Implementa APIs, ban
 model: sonnet
 effort: medium
 maxTurns: 60
-disallowedTools: Agent
+disallowedTools: Agent, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get, mcp__qmd__status
 skills:
   - delivery-contract
   - backend-standards
