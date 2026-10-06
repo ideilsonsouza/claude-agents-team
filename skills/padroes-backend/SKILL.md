@@ -26,8 +26,8 @@ description: Padrões gerais de backend da equipe, válidos para Go, Fastify e A
 - Rate limiting em rotas públicas e de autenticação.
 
 ## Dados
-- Migrations versionadas e reversíveis. Índices para colunas de busca/junção.
-- Transações em operações que alteram mais de uma entidade.
+- Schema e migrations são do agente `dba` (skill `padroes-sql`). O backend consome o schema.
+- Transações em operações que alteram mais de uma entidade. Evite N+1; selecione só as colunas necessárias.
 
 ## Observabilidade
 - Logs estruturados (JSON) com request id. Endpoint `/health`.

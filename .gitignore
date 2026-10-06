@@ -23,6 +23,8 @@
 !/skills/frontend-astro/
 !/skills/design-system/
 !/skills/ui-ux/
+!/skills/adr-template/
+!/skills/padroes-sql/
 
 # Segurança extra
 *.env
