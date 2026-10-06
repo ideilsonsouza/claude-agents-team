@@ -1,0 +1,32 @@
+# Versiona APENAS a base da equipe de agentes (lista de permissão).
+# Fica de fora: credenciais, histórico, sessões, projetos, memórias,
+# settings, plugins, cache e qualquer arquivo de contexto.
+/*
+!/.gitignore
+!/README.md
+!/agents/
+!/skills/
+
+# Skills: só as da equipe
+/skills/*
+!/skills/contrato-entrega/
+!/skills/prd-template/
+!/skills/git-convencoes/
+!/skills/deploy-checklist/
+!/skills/padroes-backend/
+!/skills/backend-go/
+!/skills/backend-fastify/
+!/skills/backend-adonisjs/
+!/skills/padroes-frontend/
+!/skills/frontend-vue/
+!/skills/frontend-react/
+!/skills/frontend-astro/
+!/skills/design-system/
+!/skills/ui-ux/
+
+# Segurança extra
+*.env
+.env*
+*.key
+*.pem
+*credentials*
