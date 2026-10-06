@@ -6,6 +6,9 @@
 !/README.md
 !/agents/
 !/skills/
+!/hooks/
+/hooks/*
+!/hooks/equipe-contexto.py
 
 # Skills: só as da equipe
 /skills/*
@@ -25,6 +28,7 @@
 !/skills/ui-ux/
 !/skills/adr-template/
 !/skills/padroes-sql/
+!/skills/base-conhecimento/
 
 # Segurança extra
 *.env

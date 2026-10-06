@@ -5,7 +5,7 @@ description: Template de ADR (Architecture Decision Record) da equipe — contex
 
 # ADR — Architecture Decision Record
 
-Salve em `docs/adr/NNNN-<titulo-curto>.md`, numeração sequencial com 4 dígitos (`0001`, `0002`...). Crie `docs/adr/README.md` com o índice se não existir e mantenha-o atualizado.
+Salve em `<pasta de ADRs>/NNNN-<titulo-curto>.md` (a pasta depende da política de artefatos do mapa: `<base>/adr/` ou `docs/adr/`), numeração sequencial com 4 dígitos (`0001`, `0002`...). Crie `README.md` na pasta com o índice se não existir e mantenha-o atualizado.
 
 ```markdown
 # NNNN. <Título da decisão no imperativo>

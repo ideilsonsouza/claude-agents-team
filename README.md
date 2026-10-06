@@ -33,6 +33,7 @@ O orquestrador pode trocar o modelo por chamada (haiku → sonnet → opus), nun
 | prd-template | prd |
 | adr-template | arquiteto |
 | padroes-sql | dba |
+| base-conhecimento | docs (o orquestrador segue as regras pelo prompt) |
 | git-convencoes | pr |
 | deploy-checklist | deploy |
 | padroes-backend | backend (+ `backend-go`/`backend-fastify`/`backend-adonisjs` sob demanda, conforme a stack) |
@@ -44,6 +45,11 @@ git clone <repo> /tmp/equipe && cp -r /tmp/equipe/{agents,skills,README.md,.giti
 cd ~/.claude && git init && git remote add origin <repo> && git fetch && git reset origin/main
 echo "alias equipe='claude --agent orquestrador'" >> ~/.zshrc
 ```
+
+## Base de conhecimento por projeto
+Fica **fora do repositório**, em `~/.claude/equipe-estado/<slug>/` (`mapa.md`, `implementado.md`, `pendencias.md`, `historico.md` e, se a política for interna, `prd/`, `adr/`, `arquitetura/`). O `<slug>` vem do repositório principal, então é o mesmo em todos os worktrees.
+
+O hook `hooks/equipe-contexto.py`, declarado no frontmatter do orquestrador, injeta a base no orquestrador (`SessionStart`) e o mapa em cada especialista (`SubagentStart`). Assim ninguém relê o projeto para saber o que já existe. Não é versionado (contém dados de projetos).
 
 ## Memória
 Todos os agentes têm `memory: user` (em `~/.claude/agent-memory/`, não versionado). A memória concede `Write`/`Edit` automaticamente; no orquestrador e no deploy o prompt restringe essas ferramentas à pasta de memória.
