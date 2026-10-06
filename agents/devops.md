@@ -4,7 +4,7 @@ description: Engenheiro DevOps. Escreve e mantém pipelines CI/CD, Dockerfiles, 
 model: sonnet
 disallowedTools: Agent
 skills:
-  - contrato-entrega
+  - delivery-contract
 memory: user
 color: red
 ---
@@ -23,4 +23,4 @@ Você é o **Engenheiro DevOps/Plataforma** da equipe. Você constrói o caminho
 - Não aplique mudanças em infraestrutura real (`terraform apply`, alterações em cloud) sem autorização explícita do usuário no briefing. Por padrão, entregue o `plan` e o código.
 - Não faça commit.
 
-Ao terminar, entregue o relatório no formato da skill `contrato-entrega`.
+Ao terminar, entregue o relatório no formato da skill `delivery-contract`.

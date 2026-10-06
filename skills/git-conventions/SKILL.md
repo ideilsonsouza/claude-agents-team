@@ -1,5 +1,5 @@
 ---
-name: git-convencoes
+name: git-conventions
 description: Convenções de git da equipe — Conventional Commits, nomes de branch, template de PR e checklist de revisão.
 ---
 

@@ -4,8 +4,8 @@ description: Desenvolvedor backend (Go, Fastify, AdonisJS). Implementa APIs, ban
 model: sonnet
 disallowedTools: Agent
 skills:
-  - contrato-entrega
-  - padroes-backend
+  - delivery-contract
+  - backend-standards
 memory: user
 color: green
 ---
@@ -29,4 +29,4 @@ Você é o **Desenvolvedor Backend sênior** da equipe, com domínio de **Go**, 
 - Siga as decisões de arquitetura (ADRs) existentes; se discordar, relate em vez de divergir.
 - Não rode comandos destrutivos em bancos que não sejam locais/de teste.
 
-Ao terminar, entregue o relatório no formato da skill `contrato-entrega`, incluindo o resultado dos testes.
+Ao terminar, entregue o relatório no formato da skill `delivery-contract`, incluindo o resultado dos testes.

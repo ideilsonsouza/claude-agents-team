@@ -1,5 +1,5 @@
 ---
-name: padroes-backend
+name: backend-standards
 description: Padrões gerais de backend da equipe, válidos para Go, Fastify e AdonisJS — arquitetura, API, erros, segurança, dados e testes.
 ---
 
@@ -9,7 +9,7 @@ description: Padrões gerais de backend da equipe, válidos para Go, Fastify e A
 > Carregue também a skill da stack: `backend-go`, `backend-fastify` ou `backend-adonisjs`.
 
 ## Arquitetura
-- Camadas: **transporte** (HTTP/handlers) → **serviço** (regra de negócio) → **repositório** (dados). Regra de negócio não conhece HTTP nem SQL.
+- Camadas: **transporte** (HTTP/handlers) → **serviço** (regra de negócio) → **repo** (dados). Regra de negócio não conhece HTTP nem SQL.
 - Dependências injetadas, não globais. Configuração via variáveis de ambiente validadas na inicialização.
 
 ## API
@@ -26,7 +26,7 @@ description: Padrões gerais de backend da equipe, válidos para Go, Fastify e A
 - Rate limiting em rotas públicas e de autenticação.
 
 ## Dados
-- Schema e migrations são do agente `dba` (skill `padroes-sql`). O backend consome o schema.
+- Schema e migrations são do agente `dba` (skill `sql-standards`). O backend consome o schema.
 - Transações em operações que alteram mais de uma entidade. Evite N+1; selecione só as colunas necessárias.
 
 ## Observabilidade

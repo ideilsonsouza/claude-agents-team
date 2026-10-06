@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Injeta a base de conhecimento do projeto (fora do repositório) no contexto da equipe.
 
-SessionStart (orquestrador): mapa + implementado + pendências.
+SessionStart (orchestrator): mapa + implementado + pendências.
 SubagentStart (especialistas): mapa + caminho da base.
-Base: ~/.claude/equipe-estado/<slug>/, onde <slug> vem do repositório principal
+Base: ~/.claude/team-state/<slug>/, onde <slug> vem do repositório principal
 (estável entre worktrees, como os do Orca).
 """
 import hashlib, json, pathlib, re, subprocess, sys
 
-EQUIPE = {"arquiteto", "prd", "dba", "backend", "frontend", "qa", "docs", "pr", "devops", "deploy"}
+TEAM = {"architect", "prd", "dba", "backend", "frontend", "qa", "docs", "pr", "devops", "deploy"}
 LIMITE = 12000
 
 
@@ -40,27 +40,27 @@ def main() -> None:
     evento = dados.get("hook_event_name")
     agente = dados.get("agent_type") or ""
     raiz = raiz_projeto(dados.get("cwd") or ".")
-    base = pathlib.Path.home() / ".claude" / "equipe-estado" / slug(raiz)
+    base = pathlib.Path.home() / ".claude" / "team-state" / slug(raiz)
 
-    if evento == "SessionStart" and agente == "orquestrador":
+    if evento == "SessionStart" and agente == "orchestrator":
         base.mkdir(parents=True, exist_ok=True)
         partes = [f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase: {base}"]
-        mapa = ler(base / "mapa.md")
+        mapa = ler(base / "map.md")
         if not mapa:
             partes.append("**Projeto ainda sem mapa.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
-                          f"(skill `base-conhecimento`), gravando em {base}.")
+                          f"(skill `knowledge-base`), gravando em {base}.")
         else:
-            partes.append("## mapa.md\n" + mapa)
-            for nome in ("implementado.md", "pendencias.md"):
+            partes.append("## map.md\n" + mapa)
+            for nome in ("implemented.md", "backlog.md"):
                 conteudo = ler(base / nome)
                 if conteudo:
                     partes.append(f"## {nome}\n{conteudo}")
         contexto = "\n\n".join(partes)
-    elif evento == "SubagentStart" and agente in EQUIPE:
-        mapa = ler(base / "mapa.md") or "(projeto ainda sem mapa)"
+    elif evento == "SubagentStart" and agente in TEAM:
+        mapa = ler(base / "map.md") or "(projeto ainda sem mapa)"
         contexto = (f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}\n"
                     "Use este mapa antes de explorar o código. O que já foi entregue está em "
-                    f"{base}/implementado.md — leia só se o briefing não bastar.\n\n## mapa.md\n{mapa}")
+                    f"{base}/implemented.md — leia só se o briefing não bastar.\n\n## map.md\n{mapa}")
     else:
         return
 

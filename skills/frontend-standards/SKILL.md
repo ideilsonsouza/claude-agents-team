@@ -1,5 +1,5 @@
 ---
-name: padroes-frontend
+name: frontend-standards
 description: Padrões gerais de frontend da equipe, válidos para Vue, React e Astro — componentes, estado, dados, desempenho, acessibilidade e testes.
 ---
 

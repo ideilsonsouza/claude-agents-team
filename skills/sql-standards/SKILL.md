@@ -1,5 +1,5 @@
 ---
-name: padroes-sql
+name: sql-standards
 description: Padrões de banco de dados da equipe — modelagem, migrations seguras e reversíveis, zero downtime (expand/contract), índices, análise de queries e correção de dados. Foco em PostgreSQL, válido para MySQL com ajustes.
 ---
 

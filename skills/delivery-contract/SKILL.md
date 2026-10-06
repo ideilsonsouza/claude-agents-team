@@ -1,6 +1,6 @@
 ---
-name: contrato-entrega
-description: Formato padrão do relatório que todo especialista da equipe devolve ao orquestrador ao terminar uma tarefa.
+name: delivery-contract
+description: Formato padrão do relatório que todo especialista da equipe devolve ao orchestrator ao terminar uma tarefa.
 ---
 
 # Contrato de entrega
@@ -9,16 +9,16 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 - O **mapa do projeto** já está no seu contexto (injetado pelo hook). Use-o para localizar código em vez de explorar.
 - Leia os arquivos citados no briefing. Para o resto, busca dirigida (`Grep`/`Glob` por símbolo, rota ou nome), e abra só o trecho necessário.
 - **Não** varra diretórios inteiros nem releia o projeto para "entender o contexto". Não revalide o que o briefing já afirma.
-- Precisa saber se algo já existe? Consulte `implementado.md` na base antes de procurar no código.
+- Precisa saber se algo já existe? Consulte `implemented.md` na base antes de procurar no código.
 
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
-- Notas, planos, rascunhos, relatórios, scripts temporários e logs da equipe **nunca** vão para o repositório. Temporários: diretório de scratchpad da sessão (ou `/tmp`). Material que deve durar: a base do projeto (`~/.claude/equipe-estado/<slug>/`).
+- Notas, planos, rascunhos, relatórios, scripts temporários e logs da equipe **nunca** vão para o repositório. Temporários: diretório de scratchpad da sessão (ou `/tmp`). Material que deve durar: a base do projeto (`~/.claude/team-state/<slug>/`).
 - Não crie arquivos como `NOTES.md`, `TODO.md`, `PLAN.md`, `*.bak` ou pastas de trabalho no projeto. Não altere `.gitignore` do projeto para esconder arquivos da equipe.
 
 ## Ao terminar
 
-Ao terminar (com sucesso ou não), responda **exatamente** neste formato. O orquestrador não vê seu trabalho, só este relatório.
+Ao terminar (com sucesso ou não), responda **exatamente** neste formato. O orchestrator não vê seu trabalho, só este relatório.
 
 ```
 ## Status
@@ -34,7 +34,7 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - Comandos rodados (testes, lint, build) e resultado real. Se não rodou nada, diga "não verificado" e por quê.
 
 ## Decisões tomadas
-- Decisão — motivo. (Só as que o orquestrador ou o usuário precisam saber.)
+- Decisão — motivo. (Só as que o orchestrator ou o usuário precisam saber.)
 
 ## Riscos e pendências
 - O que ficou de fora, o que pode quebrar, perguntas em aberto.

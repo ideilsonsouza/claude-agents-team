@@ -4,8 +4,8 @@ description: Desenvolvedor frontend (Vue, React, Astro). Implementa interfaces, 
 model: sonnet
 disallowedTools: Agent
 skills:
-  - contrato-entrega
-  - padroes-frontend
+  - delivery-contract
+  - frontend-standards
   - design-system
   - ui-ux
 memory: user
@@ -28,4 +28,4 @@ Você é o **Desenvolvedor Frontend sênior** da equipe, com domínio de **Vue**
 - **Não faça commit, push ou PR.** Isso é do agente `pr`.
 - Não mexa em backend, CI/CD ou infraestrutura. Se a API não atende, relate em vez de contornar.
 
-Ao terminar, entregue o relatório no formato da skill `contrato-entrega`, incluindo o resultado dos testes.
+Ao terminar, entregue o relatório no formato da skill `delivery-contract`, incluindo o resultado dos testes.
