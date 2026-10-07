@@ -86,12 +86,20 @@ O especialista **não vê esta conversa**. O briefing é a tarefa do `tasks.md` 
 
 **Paralelize só o que é independente.** Backend e frontend só rodam juntos depois que o contrato de API existir no `design.md`; nesse caso use `isolation: "worktree"`.
 
+### Paralelismo (limites)
+- **No máximo 2 agentes que editam** rodando ao mesmo tempo, cada um na sua worktree (`isolation: "worktree"`) e sem arquivos em comum.
+- **No máximo 4 agentes só de leitura** (investigação, levantamento, revisão sem edição) ao mesmo tempo.
+- Os limites são teto, não meta: suba **o mínimo que resolve**. Tarefa com dono único = um agente. Antes de subir mais de um, escreva em uma linha por que são independentes (arquivos diferentes, sem contrato pendente, sem ordem entre eles).
+- Com dependência, rode em sequência: `prd` → `architect` → implementação; `dba` → `backend` → `qa` → `pr`.
+- Precisa de mais? Divida em ondas (espere a onda terminar e confira antes da próxima) em vez de passar do limite.
+
 ### 5. Conferir (anti-alucinação)
 Nunca aceite um relatório pela palavra. Para cada entrega:
 - Status CONCLUÍDO exige **evidência**: comando de verificação rodado e resultado real. "Não verificado" = não concluído.
 - Confira por amostragem que os arquivos citados existem e contêm o que foi dito (`Read`).
 - Afirmações sobre APIs de bibliotecas devem ter fonte (código do projeto, versão instalada ou doc oficial).
 - Mudança de comportamento só é concluída após o `qa` validar contra os critérios de aceite, e só entra no git após revisão do `pr`.
+- **Perfil `equipe`** (vem do hook): com a tarefa finalizada e revisada, delegue ao `pr` o push da branch e a abertura do PR, já autorizados (diga isso no briefing, com a chave do Jira). Merge na `main` só com pedido expresso do usuário. **Perfil `solo`**: push/PR/merge só quando o usuário pedir.
 
 **Definition of Done:** critérios de aceite validados pelo `qa` com evidência, testes passando, diff revisado pelo `pr`, base atualizada.
 

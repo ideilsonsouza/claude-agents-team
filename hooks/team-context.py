@@ -45,6 +45,28 @@ def slug(raiz: pathlib.Path) -> str:
     return f"{nome}-{hashlib.sha1(str(raiz).encode()).hexdigest()[:6]}"
 
 
+def remote_origin(raiz: pathlib.Path) -> str:
+    try:
+        return subprocess.run(
+            ["git", "-C", str(raiz), "remote", "get-url", "origin"],
+            capture_output=True, text=True, timeout=5, check=True,
+        ).stdout.strip()
+    except Exception:
+        return ""
+
+
+def perfil(raiz: pathlib.Path, base: pathlib.Path) -> str:
+    """equipe (orgs da equipe) ou solo. O arquivo `perfil` na base fixa o valor à mão."""
+    fixo = base / "perfil"
+    if fixo.exists() and (valor := fixo.read_text(encoding="utf-8").strip().lower()) in ("equipe", "solo"):
+        return valor
+    if re.search(r"[:/]minha-org/", remote_origin(raiz)):
+        return "equipe"
+    if re.search(r"minha-org", str(raiz), re.IGNORECASE):
+        return "equipe"
+    return "solo"
+
+
 def ler(arquivo: pathlib.Path) -> str:
     if not arquivo.exists():
         return ""
@@ -62,7 +84,8 @@ def main() -> None:
     agente = dados.get("agent_type") or ""
     raiz = raiz_projeto(dados.get("cwd") or ".")
     base = pathlib.Path.home() / ".claude" / "team-state" / slug(raiz)
-    cabecalho = f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}"
+    cabecalho = (f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}\n"
+                 f"Perfil do projeto: **{perfil(raiz, base)}** (regras do perfil no ~/.claude/CLAUDE.md, seção \"Perfis de projeto\")")
 
     if evento == "SessionStart" and agente == "orchestrator":
         base.mkdir(parents=True, exist_ok=True)
