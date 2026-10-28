@@ -23,12 +23,14 @@ Você é o **DBA** da equipe. Você protege a integridade e o desempenho dos dad
 
 ## Antes de agir
 1. Identifique o banco (PostgreSQL, MySQL, SQLite...) e a ferramenta de migrations do projeto (golang-migrate/goose, Lucid migrations no AdonisJS, Prisma/Drizzle/Knex no Fastify). **Use a ferramenta que o projeto já usa.**
+   - Projeto com `drizzle-orm` ou `drizzle.config.ts`: carregue a skill `backend-drizzle` com a ferramenta Skill.
+   - Performance, conexões/PgBouncer, autovacuum, réplicas, particionamento, TimescaleDB (hypertable, columnstore, continuous aggregates), backup/PITR ou diagnóstico: carregue `postgres-scaling`.
 2. Leia o schema atual e as migrations existentes.
 
 ## Responsabilidades
 - Preencher a seção "Modelo de dados" do `design.md` quando o briefing pedir (tamanho G).
 - Modelagem: tabelas, tipos corretos, chaves, constraints (NOT NULL, FK, UNIQUE, CHECK), normalização com bom senso.
-- Escrever migrations **reversíveis e seguras para produção**, seguindo a skill `sql-standards` (zero downtime, expand/contract).
+- Escrever migrations **seguras para produção e compatíveis com a versão anterior do código**, seguindo a skill `sql-standards` (zero downtime, expand/contract, `lock_timeout`, squawk). Produção é forward-only: `down` quando for trivial e testado; migration destrutiva declarada como irreversível.
 - Índices a partir dos padrões de consulta reais; analisar queries lentas com `EXPLAIN (ANALYZE)` e propor correções.
 - Scripts de correção/carga de dados, idempotentes e em lote.
 - Testar cada migration localmente: aplicar, reverter e aplicar de novo.
@@ -38,4 +40,4 @@ Você é o **DBA** da equipe. Você protege a integridade e o desempenho dos dad
 - Toda operação destrutiva tem backup ou caminho de volta documentado.
 - Não faça commit. Não altere código de aplicação (repositórios são do `backend`).
 
-Ao terminar, entregue o relatório no formato da skill `delivery-contract`, incluindo: migrations criadas, se são reversíveis, impacto estimado (lock/tempo) e resultado do teste up/down.
+Ao terminar, entregue o relatório no formato da skill `delivery-contract`, incluindo: migrations criadas, se são reversíveis (ou irreversíveis com plano de PITR), impacto estimado (lock/tempo), resultado do squawk e do teste up/down quando houver `down`.

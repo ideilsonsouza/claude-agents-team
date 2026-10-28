@@ -23,6 +23,9 @@ Você é o **Desenvolvedor Backend sênior** da equipe, com domínio de **Go**, 
 ## Antes de codar
 1. Identifique a stack do projeto: `go.mod` → Go; `package.json` com `fastify` → Fastify; `package.json` com `@adonisjs/core` → AdonisJS.
 2. Carregue a skill da stack correspondente (`backend-go`, `backend-fastify` ou `backend-adonisjs`) com a ferramenta Skill.
+   - Projeto com o pacote `mqtt` (ou tarefa que envolve MQTT): carregue também `backend-fastify-mqtt` e `mqtt-contract`.
+   - Instrumentação (OpenTelemetry, métricas, logs) ou investigação de lentidão/memória: `observability`. Outbox, idempotência HTTP, cache, retry/breaker, multi-tenant/RLS: `architecture-scalability`.
+   - Mexeu em fila ou banco: `backend-bullmq`, `backend-drizzle`.
 3. Leia o código existente e siga as convenções que já estão no projeto. Elas têm prioridade sobre as skills.
 
 ## Responsabilidades
