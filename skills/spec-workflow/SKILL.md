@@ -89,7 +89,7 @@ Tabelas/colunas/índices novos ou alterados e estratégia de migration (expand/c
 ## Riscos e mitigação
 
 ## Estratégia de testes
-O que é unitário, integração, e2e. Mapeie critérios de aceite → tipo de teste.
+O que é unitário, integração, e2e. Mapeie critérios de aceite → tipo de teste (skill `test-strategy`). Liste os casos negativos que se aplicam (autorização, tenant cruzado, entrada inválida, duplicata).
 ```
 
 ---
@@ -102,8 +102,10 @@ Spec: requirements.md · design.md (ou "tamanho M: sem spec")
 
 | ID | Tarefa | Dono | Depende de | Status |
 |----|--------|------|------------|--------|
-| T1 | Migration da tabela X | dba | — | pendente |
-| T2 | Endpoint POST /x | backend | T1 | pendente |
+| T1 | Testes de aceite CA1–CA3 (falhando) | qa | — | pendente |
+| T2 | Migration da tabela X | dba | — | pendente |
+| T3 | Endpoint POST /x (deixar T1 verde) | backend | T1, T2 | pendente |
+| T4 | Revisão do diff | reviewer | T3 | pendente |
 
 ## T1 — <título>
 - **Objetivo:** ...
@@ -112,13 +114,15 @@ Spec: requirements.md · design.md (ou "tamanho M: sem spec")
 - **Fora do escopo:** ...
 ```
 
+**Teste antes:** em M/G com mudança de comportamento, a primeira tarefa é do `qa`. Ele escreve os testes de aceite e mostra que falham pelo motivo certo, e a implementação tem como critério de pronto deixá-los verdes sem alterar o teste. Pule (anotando o motivo) em spike, protótipo, mudança só visual ou só de infra.
+
 Status: `pendente` · `em andamento` · `concluída` · `devolvida (n)` · `bloqueada`.
 
 ### Definition of Ready (antes de delegar)
 Dono único · objetivo claro · arquivos identificados · dependências concluídas · critério de pronto verificável.
 
 ### Definition of Done (antes de marcar concluída)
-Evidência de verificação no relatório · critérios de aceite validados pelo `qa` (quando há comportamento novo) · diff revisado pelo `pr` · base atualizada.
+Evidência de verificação no relatório · portão mínimo verde (typecheck, lint, testes do módulo) · critérios de aceite validados pelo `qa` (quando há comportamento novo) · `reviewer` sem achado bloqueante (M/G ou área sensível) · `pr` conferiu convenções e segredos · base atualizada.
 
 ### Ordem típica (G)
-`dba` (schema) → `backend` ∥ `frontend` (após contrato) → `qa` → `pr` → `docs` → `devops` (se CI muda) → `deploy` (com OK do usuário).
+`qa` (testes de aceite falhando) → `dba` (schema) → `backend` ∥ `frontend` (após contrato) → `qa` (validação) → `reviewer` → `pr` → `docs` → `devops` (se CI muda) → `deploy` (com OK do usuário).

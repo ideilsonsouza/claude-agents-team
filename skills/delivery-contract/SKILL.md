@@ -26,10 +26,25 @@ Regras:
 - Requisito ambíguo → pare e liste a dúvida no relatório (status BLOQUEADO) em vez de escolher uma interpretação sozinho.
 - Rode o comando de verificação do critério de pronto **antes** de reportar. Reporte o resultado real, inclusive falhas.
 
+## Portão mínimo (quem altera código)
+Além do critério de pronto, rode **sempre**, com os comandos do `tech.md` (ou, se faltarem, os scripts do `package.json`/`Makefile`/`go.mod`):
+1. **Typecheck/build** (`tsc --noEmit`, `vue-tsc`, `go build ./...`, `go vet ./...`).
+2. **Lint** do que você alterou.
+3. **Testes do módulo afetado**, não só o teste novo. Se o módulo é usado por outros, rode também os testes dos consumidores diretos.
+
+Regras:
+- Mudou comportamento e não criou nem alterou teste → status **PARCIAL**, com o motivo.
+- Não desligue, pule (`.skip`, `t.Skip`), afrouxe nem apague teste ou regra de lint para ficar verde. Teste que parece errado → BLOQUEADO, com a explicação.
+- Comando inexistente no projeto → diga "não existe no projeto" na Verificação. Não invente o comando.
+- Falha que já existia antes da sua mudança → mostre por que ela não é sua (teste de arquivo que você não tocou, mensagem sem relação com o diff, CI da `main` vermelho) e reporte em "Riscos e pendências". Não use `git stash`, `checkout` nem `reset` para provar isso.
+
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
 - Notas, planos, rascunhos, relatórios, scripts temporários e logs da equipe **nunca** vão para o repositório. Temporários: diretório de scratchpad da sessão (ou `/tmp`). Material que deve durar: a base do projeto (`~/.claude/team-state/<slug>/`).
 - Não crie arquivos como `NOTES.md`, `TODO.md`, `PLAN.md`, `*.bak` ou pastas de trabalho no projeto. Não altere `.gitignore` do projeto para esconder arquivos da equipe.
+
+## Idioma
+- Escreva o relatório de entrega **em português do Brasil** (identificadores, caminhos e comandos ficam como estão).
 
 ## Ao terminar
 
@@ -46,7 +61,9 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - caminho/arquivo — criado | alterado | removido — motivo curto
 
 ## Verificação
-- Comandos rodados (testes, lint, build) e resultado real. Se não rodou nada, diga "não verificado" e por quê.
+- Portão mínimo: typecheck · lint · testes do módulo — comando e resultado real de cada um (ex.: `pnpm vitest run src/orders` → 42 passed).
+- Critério de pronto: comando e resultado.
+- Se não rodou algo, diga "não verificado" e por quê.
 
 ## Decisões tomadas
 - Decisão — motivo. (Só as que o orchestrator ou o usuário precisam saber.)

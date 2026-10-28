@@ -21,6 +21,7 @@ POR_AGENTE = {
     "backend": ("tech.md", "structure.md"),
     "frontend": ("tech.md", "structure.md"),
     "qa": ("tech.md", "structure.md"),
+    "reviewer": ("product.md", "tech.md", "structure.md"),
     "docs": ("product.md", "tech.md", "structure.md"),
     "pr": ("tech.md",),
     "devops": ("tech.md", "structure.md"),
@@ -55,15 +56,32 @@ def remote_origin(raiz: pathlib.Path) -> str:
         return ""
 
 
+# Padrões que marcam um projeto como "equipe" ficam fora do repositório, em
+# ~/.claude/team-orgs: uma regex por linha, comparada com o remote origin e com o
+# caminho do projeto. Linhas vazias e começadas por # são ignoradas.
+# Exemplo:  [:/]minha-org/
+TEAM_ORGS = pathlib.Path.home() / ".claude" / "team-orgs"
+
+
+def padroes_equipe() -> list[str]:
+    if not TEAM_ORGS.exists():
+        return []
+    linhas = TEAM_ORGS.read_text(encoding="utf-8").splitlines()
+    return [l.strip() for l in linhas if l.strip() and not l.strip().startswith("#")]
+
+
 def perfil(raiz: pathlib.Path, base: pathlib.Path) -> str:
-    """equipe (orgs da equipe) ou solo. O arquivo `perfil` na base fixa o valor à mão."""
+    """equipe (padrões em ~/.claude/team-orgs) ou solo. O arquivo `perfil` na base fixa o valor à mão."""
     fixo = base / "perfil"
     if fixo.exists() and (valor := fixo.read_text(encoding="utf-8").strip().lower()) in ("equipe", "solo"):
         return valor
-    if re.search(r"[:/]minha-org/", remote_origin(raiz)):
-        return "equipe"
-    if re.search(r"minha-org", str(raiz), re.IGNORECASE):
-        return "equipe"
+    alvos = (remote_origin(raiz), str(raiz))
+    for padrao in padroes_equipe():
+        try:
+            if any(re.search(padrao, alvo, re.IGNORECASE) for alvo in alvos):
+                return "equipe"
+        except re.error:
+            continue
     return "solo"
 
 

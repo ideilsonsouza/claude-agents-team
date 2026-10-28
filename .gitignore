@@ -15,8 +15,10 @@
 !/hooks/compact-bash.py
 !/hooks/compact-output.py
 !/hooks/qmd-reindex.py
+!/hooks/orchestrator-guard.py
+!/hooks/reviewer-guard.py
 
-# Skills: só as da equipe
+# Skills: só as escritas pela equipe (terceiros e as específicas de produto ficam fora)
 /skills/*
 !/skills/delivery-contract/
 !/skills/spec-workflow/
@@ -36,6 +38,27 @@
 !/skills/adr-template/
 !/skills/sql-standards/
 !/skills/knowledge-base/
+!/skills/test-strategy/
+!/skills/architecture-scalability/
+!/skills/backend-bullmq/
+!/skills/backend-drizzle/
+!/skills/backend-fastify-mqtt/
+!/skills/cd-practices/
+!/skills/cicd-github-actions/
+!/skills/deploy-coolify/
+!/skills/deploy-dokploy/
+!/skills/find-skills/
+!/skills/mqtt-broker/
+!/skills/mqtt-contract/
+!/skills/observability/
+!/skills/postgres-scaling/
+!/skills/sandbox-isolated-vm/
+!/skills/security-go/
+!/skills/security-hardening/
+!/skills/security-node/
+!/skills/security-python/
+!/skills/security-supply-chain/
+!/skills/ui-review/
 
 # Segurança extra
 *.env

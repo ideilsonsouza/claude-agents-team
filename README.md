@@ -1,10 +1,16 @@
 # Equipe de agentes — Claude Code
 
-Equipe global de desenvolvimento. Um **orchestrator** (Opus 5.5) que nunca executa — classifica, planeja, delega, confere e mantém o estado — e dez especialistas.
+Equipe global de desenvolvimento. Um **orchestrator** (Opus 5.5) que nunca executa — classifica, planeja, delega, confere e mantém o estado — e onze especialistas.
 
 Objetivos, nesta ordem: **entregas corretas** (zero alucinação) · **pouco retrabalho** · **poucos tokens**.
 
 ## Uso
+
+**Padrão global:** `"agent": "orchestrator"` no `~/.claude/settings.json`, ou seja, toda sessão do Claude Code em qualquer pasta já abre como orchestrator. Sessão comum, sem a equipe: `claude-direto` (alias de `claude --agent claude`).
+
+**Travas técnicas (hooks), além das instruções:**
+- `hooks/orchestrator-guard.py`: o orchestrator só escreve em `team-state/`, na própria memória e no scratchpad. Escrita em código é bloqueada. Chamadas de dentro de subagentes passam.
+- `hooks/reviewer-guard.py`: o reviewer é só leitura (git diff/log/show..., ls, cat, grep). Sem edição, commit, redirecionamento nem `git -c`.
 
 ```bash
 team-init                 # ativa a equipe no projeto atual (uma vez por projeto)
@@ -25,9 +31,10 @@ team-init --off           # desativa
 | dba | sonnet | medium | Schema, migrations, índices, queries |
 | backend | sonnet | medium | Go, Fastify, AdonisJS (não cria migrations) |
 | frontend | sonnet | medium | Vue, React, Astro + design system e UI/UX |
-| qa | sonnet | medium | Valida cada critério de aceite com evidência; não corrige código |
+| qa | sonnet | medium | Escreve os testes de aceite **antes** (M/G) e valida cada critério com evidência; não corrige código |
+| reviewer | opus | high | Revisão independente do diff (spec, contrato, bugs, segurança, testes). Só leitura, travado por hook |
 | docs | sonnet | low | README, guias, docs de API, mapeamento inicial da base |
-| pr | sonnet | low | Único que faz commit/push/PR; revisa o diff |
+| pr | sonnet | low | Único que faz commit/push/PR; conferência final de convenções e segredos |
 | devops | sonnet | medium | Escreve CI/CD, Docker, IaC (não faz deploy) |
 | deploy | sonnet | low | Executa release e rollback (não edita nada) |
 
@@ -42,8 +49,9 @@ O orchestrator troca o modelo por chamada (haiku → sonnet → opus, nunca acim
    - **G** (feature nova, várias camadas) → `requirements.md` → *aprovação* → `design.md` → *aprovação* → `tasks.md`
 3. **Planejar** — cada tarefa passa pela *Definition of Ready*: dono, objetivo, arquivos, dependências, critério de pronto verificável.
 4. **Delegar** — briefing cirúrgico; paralelo só após o contrato de API existir (backend ∥ frontend em worktrees isolados).
-5. **Conferir** — CONCLUÍDO exige evidência; *Definition of Done*: `qa` validou os critérios, testes passando, `pr` revisou, base atualizada.
-6. **Corrigir** — devolve ao mesmo agente com o defeito exato; problema de requisito/design volta para a spec.
+5. **Testar antes** — em M/G, o `qa` escreve os testes de aceite falhando e a implementação deixa os testes verdes sem alterá-los.
+6. **Conferir** — CONCLUÍDO exige evidência; *Definition of Done*: portão mínimo verde (typecheck, lint, testes do módulo), `qa` validou os critérios, `reviewer` sem bloqueante (M/G ou área sensível), `pr` conferiu, base atualizada.
+7. **Corrigir** — devolve ao mesmo agente com o defeito exato; problema de requisito/design volta para a spec.
 
 ## Anti-alucinação
 
@@ -52,6 +60,7 @@ Skill `delivery-contract` (pré-carregada em todos os especialistas):
 - Nada de APIs, flags, rotas ou colunas inventadas: confirmar antes de usar.
 - Toda afirmação com evidência (`arquivo:linha`, saída de comando, link).
 - Ambiguidade → status BLOQUEADO com a pergunta, nunca interpretação silenciosa.
+- **Portão mínimo** para quem altera código: typecheck + lint + testes do módulo afetado, com saída real. Mudou comportamento sem teste → PARCIAL. Proibido pular ou afrouxar teste.
 - Relatório padronizado com status, verificação real e "Atualização da base".
 
 ## Economia de tokens
@@ -109,12 +118,17 @@ Decisão: **sem RAG vetorial sobre o código.** A Anthropic trocou RAG por busca
 | sql-standards | dba |
 | git-conventions | pr |
 | deploy-checklist | deploy |
+| test-strategy | qa, reviewer |
 | backend-standards | backend (+ `backend-go` / `backend-fastify` / `backend-adonisjs` sob demanda) |
 | frontend-standards, design-system, ui-ux | frontend (+ `frontend-vue` / `frontend-react` / `frontend-astro` sob demanda) |
 
 ## Versionamento
 
 Este diretório (`~/.claude`) é um repositório git com **lista de permissão** (`.gitignore`): só entram `agents/`, as skills da equipe, `hooks/` da equipe, `bin/team-init` e este README. Ficam fora: credenciais, histórico, sessões, settings, plugins, memórias dos agentes (`agent-memory/`) e a base dos projetos (`team-state/`).
+
+Também ficam fora as skills de terceiros (instale da origem: `frontend-design`, `clickhouse-best-practices`, `nats`, `uv`, `graphify`) e as específicas de produto (`appliance-*`). As referências a elas nos agentes só funcionam onde estiverem instaladas.
+
+Perfil `equipe`: os padrões de org/caminho ficam em `~/.claude/team-orgs` (uma regex por linha, não versionado). Sem esse arquivo, todo projeto é `solo`, a menos que a base tenha o arquivo `perfil`.
 
 Memória: todos os agentes têm `memory: user`. A memória concede `Write`/`Edit`; no orchestrator e no deploy o prompt restringe essas ferramentas à memória (e, no orchestrator, à base).
 
