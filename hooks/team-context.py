@@ -9,41 +9,43 @@ SubagentStart (especialistas): só os arquivos relevantes ao papel.
 Base: ~/.claude/team-state/<slug>/, onde <slug> vem do repositório principal
 (estável entre worktrees, como os do Orca).
 """
-import hashlib, json, pathlib, re, subprocess, sys
+import json, pathlib, re, subprocess, sys
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+try:
+    from team_base import base_dir, raiz_projeto  # noqa: E402
+except Exception:  # hook roda em toda sessão: nunca derruba por falha de import
+    base_dir = raiz_projeto = None
 
 STEERING = ("product.md", "tech.md", "structure.md")
 
 # Arquivos injetados em cada especialista. O resto ele lê sob demanda.
 POR_AGENTE = {
     "architect": ("product.md", "tech.md", "structure.md"),
-    "prd": ("product.md", "progress.md"),
-    "dba": ("tech.md", "structure.md"),
+    "prd": ("product.md", "progress.md", "domain.md"),
+    "dba": ("tech.md", "structure.md", "domain.md"),
     "backend": ("tech.md", "structure.md"),
     "frontend": ("tech.md", "structure.md"),
+    "native": ("tech.md", "structure.md"),
     "qa": ("tech.md", "structure.md"),
     "reviewer": ("product.md", "tech.md", "structure.md"),
     "docs": ("product.md", "tech.md", "structure.md"),
     "pr": ("tech.md",),
     "devops": ("tech.md", "structure.md"),
     "deploy": ("tech.md",),
+    "product-designer": ("product.md", "domain.md", "structure.md"),
+    "shop-floor": ("product.md", "domain.md"),
+    "legal": ("product.md", "business.md"),
+    "finance": ("product.md", "business.md", "domain.md"),
+    "gtm": ("product.md", "business.md", "progress.md"),
+    "marketing": ("product.md", "business.md"),
+    "data-analyst": ("product.md", "domain.md", "tech.md"),
+    "skills-curator": ("tech.md",),
 }
-LIMITE = 12000
-
-
-def raiz_projeto(cwd: str) -> pathlib.Path:
-    try:
-        common = subprocess.run(
-            ["git", "-C", cwd, "rev-parse", "--path-format=absolute", "--git-common-dir"],
-            capture_output=True, text=True, timeout=5, check=True,
-        ).stdout.strip()
-        return pathlib.Path(common).parent
-    except Exception:
-        return pathlib.Path(cwd)
-
-
-def slug(raiz: pathlib.Path) -> str:
-    nome = re.sub(r"[^a-z0-9]+", "-", raiz.name.lower()).strip("-") or "projeto"
-    return f"{nome}-{hashlib.sha1(str(raiz).encode()).hexdigest()[:6]}"
+MAX_ARQUIVOS = 3  # por papel, em ordem de prioridade (o primeiro é o último a ser cortado)
+LIMITE = 12000  # teto individual por arquivo
+LIMITE_TOTAL = 9500  # texto inteiro injetado (acima de 10.000 o Claude Code reduz a uma prévia de 2.000)
+MIN_TRUNCAR = 1500  # abaixo disso, o arquivo não é injetado: só uma nota
 
 
 def remote_origin(raiz: pathlib.Path) -> str:
@@ -92,37 +94,108 @@ def ler(arquivo: pathlib.Path) -> str:
     return texto if len(texto) <= LIMITE else texto[:LIMITE] + "\n\n[... truncado; leia o arquivo completo se precisar]"
 
 
-def secoes(base: pathlib.Path, nomes) -> list[str]:
-    return [f"## {nome}\n{conteudo}" for nome in nomes if (conteudo := ler(base / nome))]
+def nota_curta(base: pathlib.Path, nome: str) -> str:
+    return f"[{nome} não injetado por orçamento; leia {base / nome}]"
+
+
+def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL) -> list[str]:
+    """Seções que cabem em `restante` caracteres, em ordem de prioridade.
+
+    Cabe (já reservando as notas dos arquivos seguintes) -> inclui. Não cabe e sobram
+    >= MIN_TRUNCAR -> inclui truncada com nota. Senão -> nota de uma linha.
+    Cada item custa len + 2 (separador "\n\n" do join). O custo das notas dos arquivos que
+    ainda vêm é sempre reservado, então o total nunca passa de `restante`.
+    """
+    saida = []
+    nomes = [n for n in nomes if (base / n).exists()]
+    # orçamento menor que as notas de todos os arquivos: nem as notas cabem -> só o cabeçalho
+    if restante < sum(len(nota_curta(base, n)) + 2 for n in nomes):
+        return []
+    for i, nome in enumerate(nomes):
+        conteudo = ler(base / nome)
+        if not conteudo:
+            continue
+        reserva = sum(len(nota_curta(base, n)) + 2 for n in nomes[i + 1:])
+        secao = f"## {nome}\n{conteudo}"
+        custo = len(secao) + 2
+        if custo + reserva <= restante:
+            saida.append(secao)
+            restante -= custo
+            continue
+        nota = f"\n\n[... truncado por orçamento; leia {base / nome}]"
+        corte = restante - reserva - 2 - len(f"## {nome}\n") - len(nota)
+        if restante - reserva >= MIN_TRUNCAR and corte > 0:
+            secao = f"## {nome}\n{conteudo[:corte]}{nota}"
+        else:
+            secao = nota_curta(base, nome)
+        saida.append(secao)
+        restante -= len(secao) + 2
+    return saida
+
+
+def montar(dados: dict) -> tuple[str, str] | None:
+    evento = dados.get("hook_event_name")
+    agente = dados.get("agent_type") or ""
+    cwd = dados.get("cwd") or "."
+    if evento not in ("SessionStart", "SubagentStart"):
+        return None
+    if evento == "SessionStart" and agente != "orchestrator":
+        return None
+    if evento == "SubagentStart" and agente not in POR_AGENTE:
+        return None
+    try:
+        raiz, base = raiz_projeto(cwd), base_dir(cwd)
+    except Exception:
+        return evento, f"# Base de conhecimento da equipe\nProjeto: {cwd}\n(base indisponível: erro ao localizar a base do projeto)"
+    try:
+        prof = perfil(raiz, base)
+    except Exception:
+        prof = "solo"
+    cabecalho = (f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}\n"
+                 f"Perfil do projeto: **{prof}** (regras do perfil no ~/.claude/CLAUDE.md, seção \"Perfis de projeto\")")
+    try:
+        if evento == "SessionStart":
+            try:
+                base.mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
+            partes = [cabecalho]
+            if not any((base / n).exists() for n in STEERING):
+                partes.append("**Projeto ainda sem base.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
+                              f"(skill `knowledge-base`), gravando em {base}.")
+            else:
+                ordem = (*STEERING, "progress.md", "backlog.md")
+                extras = [str(base / n) for n in ("domain.md", "business.md") if (base / n).exists()]
+                linha = ("Existem também (leia sob demanda): " + ", ".join(extras)) if extras else ""
+                partes += secoes(base, ordem, LIMITE_TOTAL - len(cabecalho) - len(linha) - 4)
+                if linha:
+                    partes.append(linha)
+        else:
+            intro = (cabecalho + "\nUse estes arquivos antes de explorar o código. Outros arquivos da base "
+                     "(product, tech, structure, domain, business, progress, backlog e as pastas domain/, business/, "
+                     "design/, analytics/, specs/) estão no caminho acima — leia só se o briefing não bastar.")
+            nomes_ag = POR_AGENTE[agente][:MAX_ARQUIVOS]
+            corpo = secoes(base, nomes_ag, LIMITE_TOTAL - len(intro) - 2)
+            if not corpo and not any((base / n).exists() for n in nomes_ag):
+                corpo = ["(projeto ainda sem base)"]
+            partes = [intro, *corpo] if corpo else [cabecalho]  # sem corpo por orçamento: só o cabeçalho
+    except Exception:
+        partes = [cabecalho]  # pior caso: ao menos o cabeçalho
+    return evento, "\n\n".join(partes)
 
 
 def main() -> None:
-    dados = json.load(sys.stdin)
-    evento = dados.get("hook_event_name")
-    agente = dados.get("agent_type") or ""
-    raiz = raiz_projeto(dados.get("cwd") or ".")
-    base = pathlib.Path.home() / ".claude" / "team-state" / slug(raiz)
-    cabecalho = (f"# Base de conhecimento da equipe\nProjeto: {raiz}\nBase (fora do repositório): {base}\n"
-                 f"Perfil do projeto: **{perfil(raiz, base)}** (regras do perfil no ~/.claude/CLAUDE.md, seção \"Perfis de projeto\")")
-
-    if evento == "SessionStart" and agente == "orchestrator":
-        base.mkdir(parents=True, exist_ok=True)
-        partes = [cabecalho]
-        if not any((base / n).exists() for n in STEERING):
-            partes.append("**Projeto ainda sem base.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
-                          f"(skill `knowledge-base`), gravando em {base}.")
-        else:
-            partes += secoes(base, (*STEERING, "progress.md", "backlog.md"))
-    elif evento == "SubagentStart" and agente in POR_AGENTE:
-        corpo = secoes(base, POR_AGENTE[agente]) or ["(projeto ainda sem base)"]
-        partes = [cabecalho + "\nUse estes arquivos antes de explorar o código. Outros arquivos da base "
-                  "(product, tech, structure, progress, backlog) estão no caminho acima — leia só se o briefing não bastar.",
-                  *corpo]
-    else:
-        return
-
-    contexto = "\n\n".join(partes)
-    print(json.dumps({"hookSpecificOutput": {"hookEventName": evento, "additionalContext": contexto}}, ensure_ascii=False))
+    try:
+        dados = json.load(sys.stdin)
+        if not isinstance(dados, dict):
+            return
+        resultado = montar(dados)
+        if resultado is None:
+            return
+        evento, contexto = resultado
+        print(json.dumps({"hookSpecificOutput": {"hookEventName": evento, "additionalContext": contexto}}, ensure_ascii=False))
+    except Exception:
+        return  # nunca derruba a sessão
 
 
 if __name__ == "__main__":

@@ -15,16 +15,19 @@ Spec proporcional: só o necessário para entregar certo de primeira. Spec é **
 | **M** | Feature contida, 1–2 agentes, sem schema novo nem decisão estrutural | `tasks.md` |
 | **G** | Feature nova, várias camadas, schema, integração ou decisão estrutural | `requirements.md` → `design.md` → `tasks.md` |
 
-Na dúvida entre dois tamanhos, escolha o maior.
+Na dúvida entre dois tamanhos, escolha o maior. Fiscal, pagamento, dado pessoal ou texto jurídico público → no mínimo **M**, com consulta a `finance`/`legal`.
 
 ## Local
 `<pasta de specs>/<AAAA-MM-DD>-<feature>/`, onde a pasta segue a política de artefatos do `structure.md`: `internal` → `<base>/specs/`; `repo` → `docs/specs/`. Entregue → mover para `specs/_archive/`.
 
 ## Portões (tamanho G)
-1. `requirements.md` pronto → **usuário aprova** → segue.
-2. `design.md` pronto → **usuário aprova** → segue.
+1. `requirements.md` pronto → **validação de domínio** (abaixo) → **usuário aprova** → segue.
+2. `design.md` (e `ui.md`, se houver tela) pronto → **usuário aprova** → segue.
 3. `tasks.md` pronto → execução.
-Mudou requisito ou design no meio? Atualize o documento e peça nova aprovação antes de mexer no código.
+4. Tarefa marcada `[jurídico]` ou `[fiscal]` só fecha com a validação profissional registrada pelo usuário ("validado por <profissional> em <data>" no chat).
+
+**Validação de domínio (antes de aprovar o `requirements.md`, tamanho G):** se os requisitos tocam regra de domínio (chão de fábrica, fiscal, jurídico, LGPD), o orchestrator consulta o especialista pelos gatilhos da seção "Consulta a especialistas" e anexa as respostas e a fonte ao pedido de aprovação. Termos e fórmulas conferem com o `domain.md`; divergência ou dúvida sem resposta vai a "Perguntas em aberto". Agente de domínio que ainda não existe: o usuário valida direto. Pontos `[jurídico]`/`[fiscal]` não ficam aprovados por si só: dependem da validação profissional do portão 4.
+Mudou requisito, design ou ui.md no meio? Atualize o documento e peça nova aprovação antes de mexer no código.
 
 ---
 
@@ -61,6 +64,33 @@ Desempenho (com número), segurança, acessibilidade, LGPD, observabilidade.
 ```
 
 Regras: proibido critério vago ("rápido", "amigável"); use números e comportamentos observáveis.
+
+---
+
+## `ui.md` — dono: `product-designer` (só se houver tela ou fluxo novo)
+
+```markdown
+# UI — <feature>
+Status: rascunho | aprovado · Requisitos: requirements.md
+
+## Modo e padrão
+Modo (`ui-ux` §1: Operar, Persuadir ou Ler) e padrão de tela (`ui-patterns`).
+
+## Fluxos
+Um flowchart Mermaid por história (H1…).
+
+## Telas
+| Tela | Rota | Objetivo | Dados (campo → origem no contrato) | Ações | Estados (vazio, carregando, erro, sem permissão) |
+
+## Regras de interação
+
+## Copy-chave (pt-BR)
+
+## Critérios cobertos
+| CA | Tela/estado |
+```
+
+Regras: sem tokens, componentes nem CSS (são do `frontend`). Dado que a tela precisa e o contrato não prevê vira pergunta ao `architect`, não campo inventado. Todo CA aponta para uma tela ou fluxo. Vai junto com o `design.md` no portão 2.
 
 ---
 
@@ -122,7 +152,7 @@ Status: `pendente` · `em andamento` · `concluída` · `devolvida (n)` · `bloq
 Dono único · objetivo claro · arquivos identificados · dependências concluídas · critério de pronto verificável.
 
 ### Definition of Done (antes de marcar concluída)
-Evidência de verificação no relatório · portão mínimo verde (typecheck, lint, testes do módulo) · critérios de aceite validados pelo `qa` (quando há comportamento novo) · `reviewer` sem achado bloqueante (M/G ou área sensível) · `pr` conferiu convenções e segredos · base atualizada.
+Evidência de verificação no relatório · validação profissional registrada (tarefas `[jurídico]`/`[fiscal]`) · portão mínimo verde (typecheck, lint, testes do módulo) · critérios de aceite validados pelo `qa` (quando há comportamento novo) · `reviewer` sem achado bloqueante (M/G ou área sensível) · `pr` conferiu convenções e segredos · base atualizada.
 
 ### Ordem típica (G)
-`qa` (testes de aceite falhando) → `dba` (schema) → `backend` ∥ `frontend` (após contrato) → `qa` (validação) → `reviewer` → `pr` → `docs` → `devops` (se CI muda) → `deploy` (com OK do usuário).
+`product-designer` (`ui.md`, se houver tela; antes do `design.md`) → `qa` (testes de aceite falhando) → `dba` (schema) → `backend` ∥ `frontend` (após contrato) → `qa` (validação) → `reviewer` → `pr` → `docs` → `devops` (se CI muda) → `deploy` (com OK do usuário).

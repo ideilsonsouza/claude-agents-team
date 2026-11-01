@@ -71,6 +71,10 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 ## Riscos e pendências
 - O que ficou de fora, o que pode quebrar, perguntas em aberto.
 
+## Perguntas para especialistas
+(Omita se não houver.) Só perguntas cuja resposta muda a entrega.
+| # | Para | Pergunta | Por que importa | Suposição adotada se não houver resposta | Bloqueia? |
+
 ## Atualização da base
 - O que muda em cada arquivo da base: `progress.md` (o que foi entregue), `structure.md` (pasta/módulo novo), `tech.md` (dependência, comando, convenção), `backlog.md` (pendências). "Nenhuma" se não mudou nada.
 
@@ -79,6 +83,13 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 ```
 
 Regras:
+- **Outra área:** nunca tente chamar outro agente. Pergunte em `## Perguntas para especialistas`, com `Para:` = shop-floor, legal, finance, product-designer, gtm, marketing, data-analyst, architect, dba ou usuário. Se "Bloqueia? = sim", o status é BLOQUEADO; se não, siga com a suposição e marque-a em "Decisões tomadas".
+- **Quando você é o consultado:** responda só com:
+  ## Respostas
+  | # | Resposta | Fonte (lei/artigo/link, arquivo:linha ou skill) | Confiança (alta/média/baixa) |
+  Não crie arquivos nem faça perguntas de volta a quem perguntou; dúvida sua vai em "Riscos e pendências" para o usuário.
+- **legal e finance:** a primeira linha do relatório, antes de `## Status`, é `> Não é parecer jurídico. Validar com advogado.` ou `> Não é parecer contábil ou fiscal. Validar com contador.`
+- **Sigilo:** não transcreva contrato, preço ou dado de cliente no relatório, na base ou na memória; cite o caminho do documento.
 - **Nunca** declare sucesso sem evidência. Teste falhou → status PARCIAL e mostre a saída relevante.
 - Seja conciso: o relatório é para decisão, não para narrar o processo.
 - Não inclua segredos, tokens ou dados pessoais.
