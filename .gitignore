@@ -17,6 +17,8 @@
 !/hooks/qmd-reindex.py
 !/hooks/orchestrator-guard.py
 !/hooks/reviewer-guard.py
+!/hooks/team_base.py
+!/hooks/domain-guard.py
 
 # Skills: só as escritas pela equipe (terceiros e as específicas de produto ficam fora)
 /skills/*
