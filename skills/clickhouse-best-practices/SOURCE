@@ -1,0 +1,5 @@
+source: ClickHouse/agent-skills/skills/clickhouse-best-practices
+commit: 356a8c1b9a7392adb389a132f5ad3fec38532a03
+installed: 2026-10-16
+reviewed: 2026-10-16, todos os arquivos lidos; sem scripts, hooks ou allowed-tools
+notas: regra agent-connect-mcp fala de ClickHouse Cloud e MCP; o appliance é self-hosted e offline: não instalar MCP nem usar endpoints de nuvem.

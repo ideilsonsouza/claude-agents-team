@@ -61,6 +61,8 @@
 !/skills/security-python/
 !/skills/security-supply-chain/
 !/skills/ui-review/
+!/skills/frontend-design/
+!/skills/clickhouse-best-practices/
 
 # Segurança extra
 *.env
