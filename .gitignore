@@ -64,6 +64,8 @@
 !/skills/frontend-design/
 !/skills/clickhouse-best-practices/
 !/skills/podman-quadlet/
+!/skills/rust-standards/
+!/skills/edge-gateway/
 
 # Segurança extra
 *.env
