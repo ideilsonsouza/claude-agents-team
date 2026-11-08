@@ -5,6 +5,13 @@ model: sonnet
 effort: medium
 maxTurns: 60
 disallowedTools: Agent, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get, mcp__qmd__status
+mcpServers:
+  - agent-redis:
+      type: stdio
+      command: /home/ideilson/.local/bin/mcp-agent-redis
+  - agent-clickhouse:
+      type: stdio
+      command: /home/ideilson/.local/bin/mcp-agent-clickhouse
 skills:
   - delivery-contract
   - backend-standards

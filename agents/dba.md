@@ -5,6 +5,13 @@ model: sonnet
 effort: medium
 maxTurns: 40
 disallowedTools: Agent
+mcpServers:
+  - agent-redis:
+      type: stdio
+      command: /home/ideilson/.local/bin/mcp-agent-redis
+  - agent-clickhouse:
+      type: stdio
+      command: /home/ideilson/.local/bin/mcp-agent-clickhouse
 skills:
   - delivery-contract
   - sql-standards
