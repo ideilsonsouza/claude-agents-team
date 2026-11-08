@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: Estratégia de testes da equipe para Go, Node/TypeScript (Fastify, AdonisJS, BullMQ, MQTT) e frontend (Vue, React, Astro) — nível certo de teste por tipo de mudança, testes de aceite escritos antes da implementação a partir dos critérios EARS, suíte negativa obrigatória (autorização, tenant cruzado, entrada inválida, duplicata, SSRF, webhook), dependências reais com Testcontainers, dados e fixtures determinísticos, testes instáveis e checklist de qualidade de teste. Usar ao planejar testes, escrever testes de aceite, validar entrega ou revisar se os testes provam o comportamento.
+description: Estratégia de testes da equipe para Go, Node/TypeScript (Fastify, AdonisJS, BullMQ, MQTT) e frontend (Vue, React, Astro) — nível certo de teste por tipo de mudança, testes de aceite escritos antes da implementação a partir dos critérios EARS, suíte negativa obrigatória (autorização, tenant cruzado, entrada inválida, duplicata, SSRF, webhook), dependências reais (serviços locais; no CI, da esteira), dados e fixtures determinísticos, testes instáveis e checklist de qualidade de teste. Usar ao planejar testes, escrever testes de aceite, validar entrega ou revisar se os testes provam o comportamento.
 ---
 
 # Estratégia de testes
@@ -13,7 +13,7 @@ Objetivo: **provar o comportamento pedido** com o menor conjunto de testes rápi
 |---|---|---|
 | Regra de negócio pura (cálculo, validação, máquina de estado) | Unitário, tabela de casos | Property/fuzz se a entrada é grande (Go: `testing.F`; TS: fast-check) |
 | Endpoint HTTP | Integração no nível HTTP com banco real: Fastify `app.inject`, Adonis `client` do Japa, Go `httptest` + handler real | Contrato OpenAPI no CI |
-| Query, migration, transação | Integração com Postgres real (Testcontainers), migrations aplicadas | Teste da migration sobre dados que já existem |
+| Query, migration, transação | Integração com Postgres real (serviço local em banco `test_<projeto>_<id>`; no CI, serviço da esteira), migrations aplicadas | Teste da migration sobre dados que já existem |
 | Fila/worker (BullMQ, River) | Integração com Redis/Postgres real: enfileira → processa → efeito persistido | Retry, idempotência, shutdown no meio |
 | Consumidor/publicador MQTT | Integração com broker real (Mosquitto em container) | Duplicata, reentrega sem ack, payload inválido em quarentena |
 | Integração externa (HTTP de terceiro) | Integração com servidor falso (MSW, `httptest.Server`) | Timeout, 5xx, 429, resposta malformada |
@@ -52,7 +52,7 @@ Todo endpoint novo com autenticação tem **pelo menos** os casos de BOLA e de t
 
 ## 4. Dependências reais e isolamento
 
-- Banco, Redis e broker reais via **Testcontainers** (Node: `@testcontainers/postgresql`; Go: `testcontainers-go`). Use um container por suíte e isole por transação ou por schema/banco por arquivo.
+- Banco, Redis e broker reais: localmente, use os serviços locais de `/worksapce/opt` (regra "Serviços locais" do `CLAUDE.md`); no CI, serviços da própria esteira. Não crie containers de teste (Testcontainers, `docker run`, compose próprio). Use um banco por execução (`test_<projeto>_<id>`, apagado ao terminar) e isole por transação ou por schema por arquivo. Broker que não existe em `/worksapce/opt`: pergunte ao dono.
 - Mock apenas o que está **fora** do sistema (API de terceiro, relógio, aleatoriedade). Não mocke o próprio código para fazer o teste passar.
 - Relógio: injete (`clock`/`time.Now` como dependência; Vitest `vi.useFakeTimers`; Go 1.25+ `testing/synctest` para concorrência com tempo).
 - Rede externa bloqueada nos testes (MSW `onUnhandledRequest: 'error'`).

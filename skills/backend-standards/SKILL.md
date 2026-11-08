@@ -190,7 +190,7 @@ Detalhes em `observability`.
 ## 6. Testes
 - **Pirâmide:**
   - unitários do domínio, sem I/O;
-  - **integração com banco real** (Testcontainers + migrations reais);
+  - **integração com banco real** (serviço local de `/worksapce/opt` ou da esteira no CI + migrations reais);
   - **API/contrato**: a resposta valida contra o OpenAPI, e os erros saem em `application/problem+json`.
 - **Autorização é obrigatória em toda rota com id:**
   - usuário do tenant A lendo, alterando ou apagando recurso do tenant B → 404/403;

@@ -207,5 +207,5 @@ Sem pip/compilador na imagem final.
 - Entrada hostil por rota: campo extra (deve ser rejeitado por `extra="forbid"`), id de outro
   tenant, payload no limite, string com `../`, `{{7*7}}` em campo que vai para template.
 - `hypothesis` como fuzzer em parser de entrada não confiável (CSV, payload de dispositivo, decoder).
-- Caminho de falha: derrube Postgres/Redis (Testcontainers) → nega, sem traceback, sem recurso preso.
+- Caminho de falha: simule Postgres/Redis indisponíveis (porta fechada ou host inválido; nunca derrube serviço compartilhado) → nega, sem traceback, sem recurso preso.
 - `pip-audit`, `ruff check`, `bandit` e `manage.py check --deploy` no CI e em schedule semanal.

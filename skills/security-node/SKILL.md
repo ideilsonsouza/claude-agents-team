@@ -172,6 +172,6 @@ depois de `JSON.parse` escondem exatamente o que você quer validar.
 - **Authz cruzado obrigatório**: token do tenant A pedindo recurso de B → 404 (não 403).
 - Entrada hostil por rota: `__proto__` no body, campo extra (deve ser rejeitado por
   `additionalProperties: false`), id de outro tenant, payload no limite do `bodyLimit`.
-- Caminho de falha: derrube Postgres/Redis no Testcontainers e verifique que **nega** e não vaza erro.
+- Caminho de falha: simule Postgres/Redis indisponíveis (porta fechada ou host inválido; nunca derrube serviço compartilhado) e verifique que **nega** e não vaza erro.
 - Upload: arquivo maior que o limite (recurso liberado?), extensão dupla, nome com `../`.
 - Rode `npm audit`/`osv-scanner` em schedule semanal, não só no PR.

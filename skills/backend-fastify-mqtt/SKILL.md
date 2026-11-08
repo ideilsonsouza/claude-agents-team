@@ -1,6 +1,6 @@
 ---
 name: backend-fastify-mqtt
-description: Cliente MQTT em serviço Fastify 5 com MQTT.js (mqtt 5.16) — plugin fastify-plugin com manualConnect/onReady/onClose, recepção com ack só após persistir via handleMessage (pump serial, backpressure, deadlock de publish no handler), sessão persistente MQTT 5 (sessionExpiryInterval, clientId estável por réplica), shared subscriptions, roteamento por tópico (mqtt-pattern), validação de payload e quarentena, idempotência, publicação de comandos (offline, timeout, message expiry, request/response), erros de auth e reconexão, health/readiness, métricas, graceful shutdown e testes (Testcontainers Mosquitto, Aedes, simulação de queda). Usar ao criar ou alterar código que usa o pacote mqtt num serviço Node.js/Fastify.
+description: Cliente MQTT em serviço Fastify 5 com MQTT.js (mqtt 5.16) — plugin fastify-plugin com manualConnect/onReady/onClose, recepção com ack só após persistir via handleMessage (pump serial, backpressure, deadlock de publish no handler), sessão persistente MQTT 5 (sessionExpiryInterval, clientId estável por réplica), shared subscriptions, roteamento por tópico (mqtt-pattern), validação de payload e quarentena, idempotência, publicação de comandos (offline, timeout, message expiry, request/response), erros de auth e reconexão, health/readiness, métricas, graceful shutdown e testes (broker Mosquitto, Aedes, simulação de queda). Usar ao criar ou alterar código que usa o pacote mqtt num serviço Node.js/Fastify.
 ---
 
 # MQTT em serviço Fastify (MQTT.js)
@@ -184,7 +184,7 @@ async function enviarComando(app: FastifyInstance, edgeId: string, acao: string,
 
 ## Testes
 - **Unitário:** chame `handle()` com um `IPublishPacket` fake (`{ topic, payload: Buffer.from(json), qos: 1, dup: false }`). Cubra cada motivo de quarentena e a deduplicação.
-- **Integração (MQTT 5):** use `@testcontainers/mosquitto` (`new MosquittoContainer('eclipse-mosquitto:2.1.2-alpine')`, `getConnectionString()`) + `@testcontainers/postgresql`.
+- **Integração (MQTT 5):** Postgres local de `/worksapce/opt` (banco `test_<projeto>_<id>` apagado ao terminar; no CI, serviço da esteira). O Mosquitto não existe em `/worksapce/opt`: pergunte ao dono antes de criar um; no CI, use o broker da esteira.
   - Publique com um **cliente cru** (`connectAsync` + `publishAsync`), igual ao gateway, e verifique o banco.
   - Casos obrigatórios:
     1. a mesma mensagem duas vezes grava uma só;
@@ -193,9 +193,9 @@ async function enviarComando(app: FastifyInstance, edgeId: string, acao: string,
     4. `app.close()` encerra sem perder o in-flight.
 - **Queda de conexão:**
   - `client.stream.destroy()` derruba o socket abruptamente (o broker publica o Will);
-  - `container.restart()` reinicia o broker;
-  - `@testcontainers/toxiproxy` simula latência ou black-hole.
-- **Aedes 1.2** (ESM, em memória) **não suporta MQTT 5**. Use-o só em testes unitários rápidos com `protocolVersion: 4`, ou para simular auth recusada (`aedes.authenticate`). Para MQTT 5, use Mosquitto em container.
+  - reiniciar o broker (só em broker que a própria execução criou com autorização do dono; nunca serviço compartilhado);
+  - toxiproxy (latência ou black-hole) não existe em `/worksapce/opt`: pergunte ao dono antes de criar.
+- **Aedes 1.2** (ESM, em memória) **não suporta MQTT 5**. Use-o só em testes unitários rápidos com `protocolVersion: 4`, ou para simular auth recusada (`aedes.authenticate`). Para MQTT 5, use Mosquitto (ver regra acima sobre criar o broker).
 - Encerre tudo no `afterAll`: `app.close()`, o cliente de teste e os containers.
 
 ## Armadilhas (checklist de revisão)

@@ -132,7 +132,7 @@ await db.transaction(async (tx) => {
 - Com `serializable`, trate o erro `40001` com retry.
 
 ## Testes
-- Use **Postgres real** (Testcontainers `@testcontainers/postgresql`, com a imagem do TimescaleDB se for o caso) com as migrations aplicadas pelo migrator. Não teste contra mocks do ORM.
+- Use **Postgres real** (localmente, o de `/worksapce/opt` com banco `test_<projeto>_<id>` apagado ao terminar; no CI, o serviço da esteira) com as migrations aplicadas pelo migrator. Se precisar de TimescaleDB e o serviço local não o tiver, pergunte ao dono antes de criar container. Não teste contra mocks do ORM.
 - Isole cada caso por transação revertida ou por `TRUNCATE ... RESTART IDENTITY CASCADE` entre casos.
 - Teste a migration nova contra um banco com dados (incluindo backfill), não só contra um banco vazio.
 - Para dados de teste, use factories próprias. O `drizzle-seed` (0.3.x, parado desde 01/2025) serve para popular ambiente de dev.

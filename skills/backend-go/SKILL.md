@@ -1,6 +1,6 @@
 ---
 name: backend-go
-description: Padrões para backend em Go 1.26/1.27 — versões suportadas e go.mod (go/toolchain/tool), novidades 1.23–1.27 que mudam o código (iteradores, os.Root, WaitGroup.Go, GOMAXPROCS por cgroup, errors.AsType, json/v2, uuid, synctest), estrutura cmd/internal com run(ctx) e shutdown ordenado, config, HTTP com ServeMux/chi e timeouts, OpenAPI (huma, oapi-codegen), erros e contexto, concorrência com errgroup e backpressure, pgx 5 + sqlc + goose, COPY e ingestão idempotente, MQTT 5 com paho.golang (ack após persistir), filas com River, slog/OTel/Prometheus/pprof, testes (testcontainers-go, synctest), golangci-lint v2, govulncheck e Dockerfile distroless. Usar ao criar ou alterar código em projetos com go.mod.
+description: Padrões para backend em Go 1.26/1.27 — versões suportadas e go.mod (go/toolchain/tool), novidades 1.23–1.27 que mudam o código (iteradores, os.Root, WaitGroup.Go, GOMAXPROCS por cgroup, errors.AsType, json/v2, uuid, synctest), estrutura cmd/internal com run(ctx) e shutdown ordenado, config, HTTP com ServeMux/chi e timeouts, OpenAPI (huma, oapi-codegen), erros e contexto, concorrência com errgroup e backpressure, pgx 5 + sqlc + goose, COPY e ingestão idempotente, MQTT 5 com paho.golang (ack após persistir), filas com River, slog/OTel/Prometheus/pprof, testes (serviços locais, synctest), golangci-lint v2, govulncheck e Dockerfile distroless. Usar ao criar ou alterar código em projetos com go.mod.
 ---
 
 # Go
@@ -160,7 +160,7 @@ err := pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
 
 ## Testes
 - Table-driven com `t.Run`, `t.Context()` e `go-cmp` (testify só se o projeto já usa).
-- **Integração com testcontainers-go** v0.44 (módulos `postgres`, `redis` e `mosquitto`), criando os contêineres **uma vez por pacote** no `TestMain`.
+- **Integração com serviços reais**: localmente, os serviços locais de `/worksapce/opt` (regra "Serviços locais" do `CLAUDE.md`); no CI, serviços da própria esteira. Não use testcontainers-go nem crie containers. No `TestMain`, crie **uma vez por pacote** o banco `test_<projeto>_<id>` e apague-o ao terminar, mesmo com falha. Broker MQTT não existe em `/worksapce/opt`: pergunte ao dono.
 - **Tempo:** `testing/synctest` para timeouts, retries e batching sem `sleep` real. `httptest.NewTestServer` e `synctest.Sleep` são da 1.27.
 - Golden files em `testdata/` com `-update`. Fuzz em parsers. Benchmarks com `for b.Loop() {}`.
 - No CI: `go test -race -coverprofile=cover.out ./...`.
@@ -191,6 +191,6 @@ ENTRYPOINT ["/app"]
 - [ ] Queries via sqlc. Migration conforme `sql-standards`. Ingestão idempotente.
 - [ ] MQTT com ack só depois do commit.
 - [ ] Logs sem segredo nem PII. Métricas sem label de alta cardinalidade.
-- [ ] Testes de integração com testcontainers, incluindo autorização (BOLA).
+- [ ] Testes de integração com serviços reais (locais ou da esteira), incluindo autorização (BOLA).
 - [ ] golangci-lint, govulncheck e `go mod tidy` limpos. Nenhum símbolo mais novo que a diretiva `go`.
 - [ ] Shutdown testado (SIGTERM com lote em andamento não perde dados).
