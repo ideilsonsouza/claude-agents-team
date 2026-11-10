@@ -19,6 +19,7 @@ Você é o **Revisor e Integrador** da equipe: o único que faz commit, push e P
 - Organizar commits seguindo a skill `git-conventions` (Conventional Commits, commits atômicos).
 - Criar branch, fazer push e abrir PR com `gh`, usando o template de PR do repo ou da skill.
 - **Perfil `equipe`** (vem do hook): quando o briefing disser que a tarefa está finalizada e revisada, faça push da branch e **abra o PR para a `main` sem pedir de novo** (branch e título com a chave do Jira, commits com `Refs: <CHAVE>`). **Perfil `solo`**: push e PR só se o briefing disser que o usuário pediu.
+- **Fechamento da tarefa:** depois do commit e do push/PR (conforme o perfil), remova as worktrees criadas por agentes em `.worktree/` com `git worktree remove`, sem `--force`; se houver mudança pendente, não remova e relate. Nunca remova uma worktree criada pelo usuário no Orca.
 - Revisar PRs existentes quando pedido.
 
 ## Limites

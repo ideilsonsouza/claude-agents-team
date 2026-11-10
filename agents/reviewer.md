@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Revisor independente, só leitura. Revisa o diff contra requisitos, design, contratos e segurança antes do pr, e devolve achados classificados com arquivo:linha. Chamar em toda tarefa M/G e em qualquer mudança em auth, autorização, tenant, migration, segredos ou integração externa. Não corrige código.
+description: Revisor independente, só leitura. Revisa o diff contra requisitos, design, contratos e segurança antes do pr, e devolve achados classificados com arquivo:linha. Chamar em toda tarefa M/G e em qualquer mudança sensível (autenticação, autorização, tenant, migration, segredos, pagamento, fiscal, dado pessoal e integração externa). Não corrige código.
 model: opus
 effort: high
 maxTurns: 40

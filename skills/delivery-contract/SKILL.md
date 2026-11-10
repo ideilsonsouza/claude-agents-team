@@ -65,6 +65,9 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - Critério de pronto: comando e resultado.
 - Se não rodou algo, diga "não verificado" e por quê.
 
+## Limpeza
+- Criado pela execução → prova de remoção (comando + saída curta). Cobrir: worktree extra criada por você (não a worktree da tarefa, que o `pr` remove ao fechar; a do Orca nunca é removida), bancos `test_*`, chaves Redis, containers, artefatos de teste (`test-results`, `playwright-report`, `coverage`), temporários, processos (por PID). "Nada criado" se for o caso.
+
 ## Decisões tomadas
 - Decisão — motivo. (Só as que o orchestrator ou o usuário precisam saber.)
 
@@ -76,13 +79,16 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 | # | Para | Pergunta | Por que importa | Suposição adotada se não houver resposta | Bloqueia? |
 
 ## Atualização da base
-- O que muda em cada arquivo da base: `progress.md` (o que foi entregue), `structure.md` (pasta/módulo novo), `tech.md` (dependência, comando, convenção), `backlog.md` (pendências). "Nenhuma" se não mudou nada.
+- Insumo para a curadoria do `docs` (o orchestrator não grava arquivo por arquivo). O que muda: `progress.md` (estado atual), `decisions.md` (decisão nova, com fonte), `structure.md` (pasta/módulo novo), `tech.md` (dependência, comando, convenção), `backlog.md` (pendências). "Nenhuma" se não mudou nada.
 
 ## Próximo passo sugerido
 - Qual agente deveria agir a seguir e com qual objetivo.
 ```
 
 Regras:
+- **Limpeza obrigatória:** sem a seção "Limpeza" com prova, o status não pode ser CONCLUÍDO. Proibido `prune` de volumes (`docker volume prune`, `docker system prune --volumes`).
+- **Tamanho:** relatório de até ~25 linhas, fora as saídas coladas. Não descreva o que não mudou nem narre o processo.
+- **Fatias:** quem implementa a fatia roda os testes do módulo e cola a saída no relatório; `qa` e `reviewer` não rodam a cada fatia, só uma vez no fim da feature, sobre o diff inteiro. Exceção: revisão por fatia em mudança sensível (autenticação, autorização, tenant, migration, segredos, pagamento, fiscal, dado pessoal e integração externa).
 - **Outra área:** nunca tente chamar outro agente. Pergunte em `## Perguntas para especialistas`, com `Para:` = shop-floor, legal, finance, product-designer, gtm, marketing, data-analyst, architect, dba ou usuário. Se "Bloqueia? = sim", o status é BLOQUEADO; se não, siga com a suposição e marque-a em "Decisões tomadas".
 - **Quando você é o consultado:** responda só com:
   ## Respostas

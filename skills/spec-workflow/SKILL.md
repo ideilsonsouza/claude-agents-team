@@ -144,7 +144,7 @@ Spec: requirements.md · design.md (ou "tamanho M: sem spec")
 - **Fora do escopo:** ...
 ```
 
-**Teste antes:** em M/G com mudança de comportamento, a primeira tarefa é do `qa`. Ele escreve os testes de aceite e mostra que falham pelo motivo certo, e a implementação tem como critério de pronto deixá-los verdes sem alterar o teste. Pule (anotando o motivo) em spike, protótipo, mudança só visual ou só de infra.
+**Teste antes:** em G com mudança de comportamento, a primeira tarefa é do `qa`. Ele escreve os testes de aceite e mostra que falham pelo motivo certo, e a implementação tem como critério de pronto deixá-los verdes sem alterar o teste. Em M, o `qa` valida no fim. Pule (anotando o motivo) em spike, protótipo, mudança só visual ou só de infra.
 
 Status: `pendente` · `em andamento` · `concluída` · `devolvida (n)` · `bloqueada`.
 

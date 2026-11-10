@@ -23,7 +23,7 @@ Objetivo: **provar o comportamento pedido** com o menor conjunto de testes rápi
 
 Regra: desça o teste ao nível mais baixo que ainda prova o critério. Não use E2E para regra de negócio nem mock de banco para testar query.
 
-## 2. Testes de aceite antes da implementação (M/G)
+## 2. Testes de aceite antes da implementação (só G; em M, o `qa` valida no fim)
 
 1. Para cada critério EARS (`QUANDO <evento> O sistema DEVE <resposta>`), escreva **um teste nomeado pelo critério**: `CA2: quando o token expira, retorna 401 com problem+json`.
 2. Escreva contra a **interface pública** do `design.md` (rota, status, payload, função exportada), nunca contra detalhe interno que ainda não existe.
