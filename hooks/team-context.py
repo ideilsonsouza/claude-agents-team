@@ -4,7 +4,8 @@
 Nomes de arquivo seguem o mercado: steering do Kiro (product/tech/structure)
 e Memory Bank do Cline (progress), mais backlog e history.
 
-SessionStart (orchestrator): todos os arquivos de steering + progress + backlog.
+SessionStart (orchestrator): steering + progress + decisions (só `vigente`) + backlog.
+history.md nunca é injetado. Tetos: 80 linhas por arquivo e 300 no total, com aviso do corte.
 SubagentStart (especialistas): só os arquivos relevantes ao papel.
 Base: ~/.claude/team-state/<slug>/, onde <slug> vem do repositório principal
 (estável entre worktrees, como os do Orca).
@@ -21,8 +22,8 @@ STEERING = ("product.md", "tech.md", "structure.md")
 
 # Arquivos injetados em cada especialista. O resto ele lê sob demanda.
 POR_AGENTE = {
-    "architect": ("product.md", "tech.md", "structure.md"),
-    "prd": ("product.md", "progress.md", "domain.md"),
+    "architect": ("product.md", "tech.md", "structure.md", "decisions.md"),
+    "prd": ("product.md", "progress.md", "domain.md", "decisions.md"),
     "dba": ("tech.md", "structure.md", "domain.md"),
     "backend": ("tech.md", "structure.md"),
     "frontend": ("tech.md", "structure.md"),
@@ -42,10 +43,13 @@ POR_AGENTE = {
     "data-analyst": ("product.md", "domain.md", "tech.md"),
     "skills-curator": ("tech.md",),
 }
-MAX_ARQUIVOS = 3  # por papel, em ordem de prioridade (o primeiro é o último a ser cortado)
+MAX_ARQUIVOS = 4  # por papel, em ordem de prioridade (o primeiro é o último a ser cortado)
 LIMITE = 12000  # teto individual por arquivo
 LIMITE_TOTAL = 9500  # texto inteiro injetado (acima de 10.000 o Claude Code reduz a uma prévia de 2.000)
 MIN_TRUNCAR = 1500  # abaixo disso, o arquivo não é injetado: só uma nota
+MAX_LINHAS = 80  # teto de linhas por arquivo injetado
+LINHAS_TOTAL = 300  # teto de linhas de tudo que é injetado
+NUNCA_INJETAR = ("history.md",)  # log histórico: nunca entra no contexto, só sob demanda
 
 
 def remote_origin(raiz: pathlib.Path) -> str:
@@ -87,10 +91,35 @@ def perfil(raiz: pathlib.Path, base: pathlib.Path) -> str:
     return "solo"
 
 
-def ler(arquivo: pathlib.Path) -> str:
-    if not arquivo.exists():
+def so_vigentes(texto: str) -> str:
+    """decisions.md: mantém títulos, cabeçalho da tabela e só as decisões com a coluna Status == `vigente`."""
+    saida = []
+    col = 3  # | Id | Data | Decisão | Status | Fonte |  (índice após tirar as bordas)
+    for linha in texto.splitlines():
+        celulas = [c.strip() for c in linha.strip().strip("|").split("|")]
+        if linha.lstrip().startswith("|"):
+            if celulas and celulas[0].lower() == "id" and "status" in [c.lower() for c in celulas]:
+                col = [c.lower() for c in celulas].index("status")
+            elif re.match(r"D-\d+", celulas[0]):
+                if len(celulas) <= col or celulas[col].lower() != "vigente":
+                    continue
+        saida.append(linha)
+    return "\n".join(saida)
+
+
+def ler(arquivo: pathlib.Path, max_linhas: int = MAX_LINHAS) -> str:
+    if not arquivo.exists() or arquivo.name in NUNCA_INJETAR:
         return ""
     texto = arquivo.read_text(encoding="utf-8", errors="replace")
+    if arquivo.name == "decisions.md":
+        texto = so_vigentes(texto)
+    linhas = texto.splitlines()
+    if not texto.strip():
+        return ""
+    if max_linhas <= 0:
+        return f"[... cortado; leia {arquivo}]"
+    if len(linhas) > max_linhas:
+        texto = "\n".join(linhas[:max(max_linhas, 0)]) + f"\n[... cortado em {max(max_linhas, 0)} de {len(linhas)} linhas; leia {arquivo}]"
     return texto if len(texto) <= LIMITE else texto[:LIMITE] + "\n\n[... truncado; leia o arquivo completo se precisar]"
 
 
@@ -98,7 +127,7 @@ def nota_curta(base: pathlib.Path, nome: str) -> str:
     return f"[{nome} não injetado por orçamento; leia {base / nome}]"
 
 
-def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL) -> list[str]:
+def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL, linhas_restantes: int = LINHAS_TOTAL) -> list[str]:
     """Seções que cabem em `restante` caracteres, em ordem de prioridade.
 
     Cabe (já reservando as notas dos arquivos seguintes) -> inclui. Não cabe e sobram
@@ -107,14 +136,15 @@ def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL) -> list[str]
     ainda vêm é sempre reservado, então o total nunca passa de `restante`.
     """
     saida = []
-    nomes = [n for n in nomes if (base / n).exists()]
+    nomes = [n for n in nomes if n not in NUNCA_INJETAR and (base / n).exists()]
     # orçamento menor que as notas de todos os arquivos: nem as notas cabem -> só o cabeçalho
     if restante < sum(len(nota_curta(base, n)) + 2 for n in nomes):
         return []
     for i, nome in enumerate(nomes):
-        conteudo = ler(base / nome)
+        conteudo = ler(base / nome, min(MAX_LINHAS, linhas_restantes))
         if not conteudo:
             continue
+        linhas_restantes -= conteudo.count("\n") + 2
         reserva = sum(len(nota_curta(base, n)) + 2 for n in nomes[i + 1:])
         secao = f"## {nome}\n{conteudo}"
         custo = len(secao) + 2
@@ -164,18 +194,19 @@ def montar(dados: dict) -> tuple[str, str] | None:
                 partes.append("**Projeto ainda sem base.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
                               f"(skill `knowledge-base`), gravando em {base}.")
             else:
-                ordem = (*STEERING, "progress.md", "backlog.md")
+                ordem = (*STEERING, "progress.md", "decisions.md", "backlog.md")
                 extras = [str(base / n) for n in ("domain.md", "business.md") if (base / n).exists()]
                 linha = ("Existem também (leia sob demanda): " + ", ".join(extras)) if extras else ""
-                partes += secoes(base, ordem, LIMITE_TOTAL - len(cabecalho) - len(linha) - 4)
+                partes += secoes(base, ordem, LIMITE_TOTAL - len(cabecalho) - len(linha) - 4,
+                                 LINHAS_TOTAL - cabecalho.count("\n") - 4)
                 if linha:
                     partes.append(linha)
         else:
             intro = (cabecalho + "\nUse estes arquivos antes de explorar o código. Outros arquivos da base "
-                     "(product, tech, structure, domain, business, progress, backlog e as pastas domain/, business/, "
+                     "(product, tech, structure, domain, business, progress, decisions, backlog e as pastas domain/, business/, "
                      "design/, analytics/, specs/) estão no caminho acima — leia só se o briefing não bastar.")
             nomes_ag = POR_AGENTE[agente][:MAX_ARQUIVOS]
-            corpo = secoes(base, nomes_ag, LIMITE_TOTAL - len(intro) - 2)
+            corpo = secoes(base, nomes_ag, LIMITE_TOTAL - len(intro) - 2, LINHAS_TOTAL - intro.count("\n") - 2)
             if not corpo and not any((base / n).exists() for n in nomes_ag):
                 corpo = ["(projeto ainda sem base)"]
             partes = [intro, *corpo] if corpo else [cabecalho]  # sem corpo por orçamento: só o cabeçalho
