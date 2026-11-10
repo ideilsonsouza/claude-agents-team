@@ -184,7 +184,7 @@ async function enviarComando(app: FastifyInstance, edgeId: string, acao: string,
 
 ## Testes
 - **Unitário:** chame `handle()` com um `IPublishPacket` fake (`{ topic, payload: Buffer.from(json), qos: 1, dup: false }`). Cubra cada motivo de quarentena e a deduplicação.
-- **Integração (MQTT 5):** Postgres local de `/worksapce/opt` (banco `test_<projeto>_<id>` apagado ao terminar; no CI, serviço da esteira). O Mosquitto não existe em `/worksapce/opt`: pergunte ao dono antes de criar um; no CI, use o broker da esteira.
+- **Integração (MQTT 5):** Postgres dos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais) (banco `test_<projeto>_<id>` apagado ao terminar; no CI, serviço da esteira). O Mosquitto não existe nos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais): pergunte ao dono antes de criar um; no CI, use o broker da esteira.
   - Publique com um **cliente cru** (`connectAsync` + `publishAsync`), igual ao gateway, e verifique o banco.
   - Casos obrigatórios:
     1. a mesma mensagem duas vezes grava uma só;
@@ -194,7 +194,7 @@ async function enviarComando(app: FastifyInstance, edgeId: string, acao: string,
 - **Queda de conexão:**
   - `client.stream.destroy()` derruba o socket abruptamente (o broker publica o Will);
   - reiniciar o broker (só em broker que a própria execução criou com autorização do dono; nunca serviço compartilhado);
-  - toxiproxy (latência ou black-hole) não existe em `/worksapce/opt`: pergunte ao dono antes de criar.
+  - toxiproxy (latência ou black-hole) não existe nos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais): pergunte ao dono antes de criar.
 - **Aedes 1.2** (ESM, em memória) **não suporta MQTT 5**. Use-o só em testes unitários rápidos com `protocolVersion: 4`, ou para simular auth recusada (`aedes.authenticate`). Para MQTT 5, use Mosquitto (ver regra acima sobre criar o broker).
 - Encerre tudo no `afterAll`: `app.close()`, o cliente de teste e os containers.
 

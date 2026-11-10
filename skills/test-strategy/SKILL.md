@@ -52,7 +52,7 @@ Todo endpoint novo com autenticação tem **pelo menos** os casos de BOLA e de t
 
 ## 4. Dependências reais e isolamento
 
-- Banco, Redis e broker reais: localmente, use os serviços locais de `/worksapce/opt` (regra "Serviços locais" do `CLAUDE.md`); no CI, serviços da própria esteira. Não crie containers de teste (Testcontainers, `docker run`, compose próprio). Use um banco por execução (`test_<projeto>_<id>`, apagado ao terminar) e isole por transação ou por schema por arquivo. Broker que não existe em `/worksapce/opt`: pergunte ao dono.
+- Banco, Redis e broker reais: localmente, use os serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais); no CI, serviços da própria esteira. Não crie containers de teste (Testcontainers, `docker run`, compose próprio). Use um banco por execução (`test_<projeto>_<id>`, apagado ao terminar) e isole por transação ou por schema por arquivo. Broker que não existe nos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais): pergunte ao dono.
 - Mock apenas o que está **fora** do sistema (API de terceiro, relógio, aleatoriedade). Não mocke o próprio código para fazer o teste passar.
 - Relógio: injete (`clock`/`time.Now` como dependência; Vitest `vi.useFakeTimers`; Go 1.25+ `testing/synctest` para concorrência com tempo).
 - Rede externa bloqueada nos testes (MSW `onUnhandledRequest: 'error'`).

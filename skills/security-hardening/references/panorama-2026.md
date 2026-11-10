@@ -191,7 +191,7 @@ Consenso das fontes (guias de fornecedor, sem norma oficial de 2026):
   gera proveniência (`--sbom=true --provenance=true`); verificação pina a identidade do workflow
   (`cosign verify --certificate-identity-regexp --certificate-oidc-issuer`).
 - No appliance on-premise (Podman/Quadlet), o equivalente é `User`, `ReadOnly`, `DropCapability`,
-  `NoNewPrivileges` — já descrito na skill `appliance-podman-quadlet` — mais pacote assinado com
+  `NoNewPrivileges` — já descrito na skill `podman-quadlet` — mais pacote assinado com
   minisign (`appliance-offline-package`).
 
 ---

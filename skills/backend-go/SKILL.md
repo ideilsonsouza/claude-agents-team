@@ -160,7 +160,7 @@ err := pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
 
 ## Testes
 - Table-driven com `t.Run`, `t.Context()` e `go-cmp` (testify só se o projeto já usa).
-- **Integração com serviços reais**: localmente, os serviços locais de `/worksapce/opt` (regra "Serviços locais" do `CLAUDE.md`); no CI, serviços da própria esteira. Não use testcontainers-go nem crie containers. No `TestMain`, crie **uma vez por pacote** o banco `test_<projeto>_<id>` e apague-o ao terminar, mesmo com falha. Broker MQTT não existe em `/worksapce/opt`: pergunte ao dono.
+- **Integração com serviços reais**: localmente, os serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais); no CI, serviços da própria esteira. Não use testcontainers-go nem crie containers. No `TestMain`, crie **uma vez por pacote** o banco `test_<projeto>_<id>` e apague-o ao terminar, mesmo com falha. Broker MQTT não existe nos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais): pergunte ao dono.
 - **Tempo:** `testing/synctest` para timeouts, retries e batching sem `sleep` real. `httptest.NewTestServer` e `synctest.Sleep` são da 1.27.
 - Golden files em `testdata/` com `-update`. Fuzz em parsers. Benchmarks com `for b.Loop() {}`.
 - No CI: `go test -race -coverprofile=cover.out ./...`.

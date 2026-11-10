@@ -159,7 +159,7 @@ it('GET /v1/users/:id → 404', async () => {
 });
 ```
 - Use `app.inject()`, sem porta. Vitest (ou `node:test`).
-- Banco real: localmente, o Postgres de `/worksapce/opt` (regra "Serviços locais" do `CLAUDE.md`) com banco `test_<projeto>_<id>` criado no `beforeAll` e apagado no `afterAll`, mesmo se o teste falhar; no CI, o serviço da esteira. Rode as migrations reais no `beforeAll`. Não use Testcontainers nem crie containers.
+- Banco real: localmente, o Postgres dos serviços locais da máquina (ver `~/.claude/CLAUDE.md`, seção Serviços locais) com banco `test_<projeto>_<id>` criado no `beforeAll` e apagado no `afterAll`, mesmo se o teste falhar; no CI, o serviço da esteira. Rode as migrations reais no `beforeAll`. Não use Testcontainers nem crie containers.
 - Teste também os caminhos de erro (400 de validação, 401, 404, 409) e verifique que a resposta não contém campos fora do schema.
 - Verificação: `npm run lint && npm run typecheck && npm test` (ajuste aos scripts do projeto).
 

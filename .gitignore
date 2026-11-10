@@ -4,6 +4,8 @@
 /*
 !/.gitignore
 !/README.md
+!/CLAUDE.md
+!/scripts/
 !/agents/
 !/skills/
 !/hooks/
@@ -67,6 +69,8 @@
 !/skills/rust-standards/
 !/skills/edge-gateway/
 !/skills/industrial-timeseries-etl/
+!/skills/deploy-cloudflare/
+!/skills/appliance-offline-package/
 
 # Segurança extra
 *.env

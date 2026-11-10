@@ -16,7 +16,7 @@ Já tratado em outras skills — **não duplique aqui**:
 - XSS, CSP, cookie, segredo no bundle: `frontend-standards` e `ui-review`;
 - SQL, grants, LGPD no banco: `sql-standards`; conexão e timeout: `postgres-scaling`;
 - pipeline, pin de ação, OIDC: `cicd-github-actions`; log e alerta: `observability`;
-- appliance (Podman/Quadlet, pacote assinado): `appliance-podman-quadlet`, `appliance-offline-package`.
+- appliance (Podman/Quadlet, pacote assinado): `podman-quadlet`, `appliance-offline-package`.
 
 ## 1. Critério: o que "blindado" significa
 Use o **Top 10:2025** para priorizar e o **ASVS 5.0** para fechar escopo.
