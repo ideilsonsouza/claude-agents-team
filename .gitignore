@@ -66,6 +66,7 @@
 !/skills/podman-quadlet/
 !/skills/rust-standards/
 !/skills/edge-gateway/
+!/skills/industrial-timeseries-etl/
 
 # Segurança extra
 *.env
