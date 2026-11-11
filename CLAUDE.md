@@ -6,10 +6,10 @@
 - Exceções: identificadores de código, nomes de arquivos, comandos e termos técnicos consagrados ficam como estão. Em código, comentários, commits e documentação do repositório, siga o idioma já usado no projeto; sem convenção definida, use português.
 
 ## Ambiente de trabalho: Orca IDE
-- O trabalho é feito no **Orca IDE**, que organiza os agentes por **worktree** (um pane por agente). Tarefas chegam como issues do Jira (ex.: `PROJ-21`).
+- O trabalho é feito no **Orca IDE**, que organiza os agentes por **worktree** (um pane por agente). Cada tarefa tem a sua worktree; a origem das tarefas (issue do GitHub ou, no futuro, a central dos agentes) pode fornecer um id.
 - **Uma tarefa = uma worktree.** Em geral o usuário cria a worktree no Orca; o agente só cria (`git worktree add`) quando isso for pedido explicitamente. Worktree criada por agente fica sempre em `.worktree/<nome>` dentro do projeto, em pasta não versionada: ignore-a via `.git/info/exclude`, sem alterar `.gitignore` nem fazer commit na branch padrão.
 - **Nunca troque a branch da pasta principal do repo**: ela fica na branch padrão (`main`). Trabalho em branch acontece na worktree da tarefa.
-- Os hooks do Orca em `~/.claude/settings.json` e os arquivos em `~/.orca/` pertencem ao Orca: não edite nem remova. Nunca leia `~/.orca/jira-tokens`.
+- Os hooks do Orca em `~/.claude/settings.json` e os arquivos em `~/.orca/` pertencem ao Orca: não edite nem remova. Nunca leia arquivos de token em `~/.orca/`.
 
 ## Serviços locais para teste e desenvolvimento
 - Agentes não criam containers de banco ou cache para teste (Testcontainers, `docker run`, compose próprio). Usam os serviços de `/worksapce/opt`: Postgres (5432), MariaDB (3306), Redis (6379), ClickHouse (8123/9000). Serviço parado: `docker compose up -d` na pasta dele.
@@ -32,8 +32,8 @@
 O hook da equipe informa o perfil ("Perfil do projeto: equipe|solo"). Sem o hook, deduza o perfil assim: (1) arquivo `perfil` em `~/.claude/team-state/<slug>/`; (2) remote ou caminho do projeto que casa com as regex de `~/.claude/team-orgs` (arquivo local, não versionado) = **equipe**; (3) senão = **solo**.
 
 **Equipe (projeto marcado como equipe; há outras pessoas no repo):**
-- Branch `<tipo>/<CHAVE>-<descricao>` com a chave do Jira em maiúsculas (ex.: `docs/PROJ-21-arquitetura-core`).
-- Commits em Conventional Commits com rodapé `Refs: <CHAVE>`; título do PR com a chave (ex.: `docs: levanta arquitetura do core (PROJ-21)`).
+- Branch `<tipo>/<descricao-curta>` (ex.: `docs/arquitetura-core`); se a tarefa tiver id (issue do GitHub ou, no futuro, da central), pode ser `<tipo>/<id>-<descricao>`.
+- Commits em Conventional Commits, sem rodapé `Refs:` obrigatório (use `Refs: #<n>` só se houver issue); título do PR sem chave obrigatória (ex.: `docs: levanta arquitetura do core`).
 - **Tarefa finalizada e revisada** (testes/typecheck verdes e diff revisado) → push da branch e **abertura do PR para a `main` automaticamente**, seguindo o template do repo.
 - **Merge na `main` só com pedido expresso do usuário.** Nunca push direto na `main`.
 - Não mexa em branches, PRs ou worktrees de outras pessoas; nunca rebase nem force push em branch compartilhada.

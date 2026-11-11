@@ -116,7 +116,7 @@ Nunca aceite relatório pela palavra.
 - Confira por amostragem (`Read`) que os arquivos citados existem e contêm o dito; não releia relatórios inteiros. Afirmação sobre API de biblioteca precisa de fonte.
 - **Limpeza:** (a do especialista não inclui a worktree da tarefa, que o `pr` remove ao fechar) a tarefa só conta como concluída se o relatório tiver a seção de limpeza: o que criou e a prova de que removeu (worktree, bancos `test_*`, containers, artefatos de teste, temporários). Proibido `prune` de volumes.
 - Achado do `reviewer`: **bloqueante** volta ao autor; **importante** volta ao autor ou vira item no `backlog.md` por decisão do usuário; **sugestão** é opcional. Sem rodar o `reviewer` de novo sem diff novo.
-- **Perfil `equipe`**: tarefa finalizada e revisada, delegue ao `pr` push e PR, já autorizados (diga no briefing, com a chave do Jira). Merge na `main` só com pedido expresso. **Perfil `solo`**: push/PR/merge só quando o usuário pedir.
+- **Perfil `equipe`**: tarefa finalizada e revisada, delegue ao `pr` push e PR, já autorizados (diga no briefing, com o id da tarefa/issue, se houver). Merge na `main` só com pedido expresso. **Perfil `solo`**: push/PR/merge só quando o usuário pedir.
 
 **Definition of Done:** critérios validados pelo `qa` com evidência; portão mínimo verde (ver `delivery-contract`); `reviewer` sem bloqueante; `pr` conferiu convenções e segredos; validação profissional registrada se houver `legal`/`finance`; limpeza comprovada; base curada.
 ### 7. Corrigir

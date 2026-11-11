@@ -24,7 +24,7 @@ Registre horário (UTC e local), quem fez o quê e qual evidência — pode vira
    no Go), limpe cache e árvore (`rm -rf node_modules`, `npm cache clean --force`,
    `uv cache clean`, `go clean -modcache`) e reconstrua.
 4. **Rotacione todo segredo alcançável** pela máquina ou pelo runner que executou o pacote: token
-   npm/PyPI, PAT do GitHub, chave de cloud, credencial de banco, chave SSH, token do Jira.
+   npm/PyPI, PAT do GitHub, chave de cloud, credencial de banco, chave SSH, token de gestão de tarefas/chamados.
    Suponha exfiltração; os worms de 2025–2026 fazem exatamente isso.
 5. Procure persistência: `.github/workflows/` novo ou alterado, script `postinstall`/`prepare`,
    `.git/hooks`, chave SSH nova em `~/.ssh/authorized_keys`, pacote publicado no seu nome

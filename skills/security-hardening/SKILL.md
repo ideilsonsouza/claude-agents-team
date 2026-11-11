@@ -47,7 +47,7 @@ Responda por escrito no `design.md` antes de implementar (15 min, não 15 págin
 1. **Quais são as fronteiras?** Quem fala com quem (internet → proxy → API → banco/broker/worker).
    Toda flecha que cruza fronteira precisa de autenticação, limite e timeout.
 2. **Qual entrada não é confiável?** Body, query, header, arquivo, tópico MQTT, mensagem de fila,
-   webhook, resposta de API de terceiro, issue do Jira, log, página web, saída de LLM. **Tudo isso.**
+   webhook, resposta de API de terceiro, issue/chamado, log, página web, saída de LLM. **Tudo isso.**
 3. **O que o atacante ganha?** Dado de outro tenant, credencial, execução de comando, parada da
    linha de produção. Ordene por isso, não por CVSS.
 4. **Qual é o segredo mais valioso aqui** e o que acontece se vazar hoje? Se a resposta não for

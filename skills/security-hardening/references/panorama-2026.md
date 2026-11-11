@@ -249,7 +249,7 @@ cadeia de ferramentas.
 
 Tradução para o seu fluxo (Orca IDE + agentes + MCP + skills): servidor MCP e skill instalada são
 **dependência de produção com acesso a shell e repositório**. Fixe commit ao instalar skill de
-terceiro (a skill `find-skills` já faz isso), leia o conteúdo inteiro antes, trate issue do Jira,
+terceiro (a skill `find-skills` já faz isso), leia o conteúdo inteiro antes, trate issue/chamado,
 log de CI e página web como dado não confiável, e não deixe agente com token de longa vida.
 
 ---
