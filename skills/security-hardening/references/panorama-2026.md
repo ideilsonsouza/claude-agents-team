@@ -190,9 +190,9 @@ Consenso das fontes (guias de fornecedor, sem norma oficial de 2026):
 - **SBOM + assinatura**: Syft gera SPDX/CycloneDX, `cosign attest` anexa, `docker buildx`
   gera proveniência (`--sbom=true --provenance=true`); verificação pina a identidade do workflow
   (`cosign verify --certificate-identity-regexp --certificate-oidc-issuer`).
-- No appliance on-premise (Podman/Quadlet), o equivalente é `User`, `ReadOnly`, `DropCapability`,
-  `NoNewPrivileges` — já descrito na skill `podman-quadlet` — mais pacote assinado com
-  minisign (`appliance-offline-package`).
+- No appliance on-premise (Docker/Compose), o equivalente é `user`, `read_only`, `cap_drop: [ALL]`,
+  `security_opt: no-new-privileges:true` — já descrito na skill `appliance-docker` — mais pacote
+  assinado com minisign (`appliance-offline-package`).
 
 ---
 

@@ -179,7 +179,7 @@ PRAGMA journal_size_limit = 67108864;
 | Pi 1 e Zero (ARMv6) | `arm-unknown-linux-gnueabihf` | Legado |
 
 - **`cargo-zigbuild`** (sem contêiner) é o padrão para `aarch64`: `cargo zigbuild --release --target aarch64-unknown-linux-gnu.2.31`. O sufixo fixa a **glibc mínima**; use a do SO mais antigo em campo (`ldd --version` no alvo). Ele não reconhece `armv7-unknown-linux-gnueabihf` e não faz glibc estática.
-- **`cross`** para `armv7`, testes sob QEMU (`cross test`) e dependências C com sysroot: `cargo install cross --git https://github.com/cross-rs/cross` (a release do crates.io é de 2023). Exige Docker ≥ 20.10 ou Podman ≥ 3.4 e sobe contêiner de build efêmero: confirme que o ambiente permite. Configuração em `Cross.toml`.
+- **`cross`** para `armv7`, testes sob QEMU (`cross test`) e dependências C com sysroot: `cargo install cross --git https://github.com/cross-rs/cross` (a release do crates.io é de 2023). Exige Docker ≥ 20.10 e sobe contêiner de build efêmero: confirme que o ambiente permite. Configuração em `Cross.toml`.
 - **Binário estático:** target `*-musl` (com `rusqlite` `bundled` e `rustls`, sai sem dependência dinâmica; confira com `file` e `ldd`). O alocador do musl é lento com muitas threads: meça e, se pesar, use outro alocador global.
 - `-C target-cpu` só se todo dispositivo em campo tiver a CPU; senão gera `Illegal instruction`.
 

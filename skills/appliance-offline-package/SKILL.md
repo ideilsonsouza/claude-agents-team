@@ -1,11 +1,11 @@
 ---
 name: appliance-offline-package
-description: Pacote de instalação e atualização offline do appliance on-premise — layout do .tar (manifesto, imagens, units Quadlet, configuração, migrações, instalador), manifesto com SHA-256 de cada arquivo e a combinação de versões dos serviços, imagens com podman save/load (oci-archive por imagem, tag reaplicada pelo ID), assinatura com minisign (Ed25519) e verificação embutida no instalador em Go (go-minisign), chave pública embutida e rotação de chave, cosign como alternativa e por que pesa offline, instalação atômica em /var/lib/<produto>/packages/<versão> com link current, ordem de instalação, rollback para a versão anterior, preservação de dados e testes de adulteração. Usar ao montar, assinar, validar, instalar ou atualizar o pacote do appliance, ou ao revisar o appctl.
+description: Pacote de instalação e atualização offline do appliance on-premise — layout do .tar (manifesto, imagens, compose e unit do systemd, configuração, migrações, instalador), manifesto com SHA-256 de cada arquivo e a combinação de versões dos serviços, imagens com docker save/load (um arquivo por imagem, tag reaplicada pelo ID), assinatura com minisign (Ed25519) e verificação embutida no instalador em Go (go-minisign), chave pública embutida e rotação de chave, cosign como alternativa e por que pesa offline, instalação atômica em /var/lib/<produto>/packages/<versão> com link current, ordem de instalação, rollback para a versão anterior, preservação de dados e testes de adulteração. Usar ao montar, assinar, validar, instalar ou atualizar o pacote do appliance, ou ao revisar o appctl.
 ---
 
 # Pacote offline do appliance
 
-Verificado em 16/10/2026: minisign 0.12 (ISC), `github.com/jedisct1/go-minisign` 0.2.6 (MIT), cosign v3.1.3 (Apache-2.0), Podman 4.9.3 no Ubuntu 24.04. Units: skill `podman-quadlet`.
+Verificado em 16/10/2026: minisign 0.12 (ISC), `github.com/jedisct1/go-minisign` 0.2.6 (MIT), cosign v3.1.3 (Apache-2.0), Docker Engine 29.9.3 com Compose v2 no Ubuntu 24.04 (docs.docker.com, verificado em 10/11/2026). Compose e unit do systemd: skill `appliance-docker`.
 
 ## Princípios
 - **Um arquivo leva tudo.** O appliance não tem internet: nada é baixado na instalação ou na atualização.
@@ -21,11 +21,12 @@ Verificado em 16/10/2026: minisign 0.12 (ISC), `github.com/jedisct1/go-minisign`
 ├── manifest.json.minisig    assinatura do manifesto
 ├── appctl                  instalador da versão nova (Go, estático)
 ├── images/
-│   ├── ingest-0.5.0.oci.tar
-│   ├── persistence-0.3.1.oci.tar
-│   ├── nats-2.15.1.oci.tar
-│   └── postgres-18.x.oci.tar
-├── quadlet/                 units .container/.network/.volume
+│   ├── ingest-0.5.0.tar
+│   ├── persistence-0.3.1.tar
+│   ├── nats-2.15.1.tar
+│   └── postgres-18.x.tar
+├── debs/                    docker-ce, docker-ce-cli, containerd.io, docker-compose-plugin (versões fixadas)
+├── compose/                 compose.yaml + unit do systemd (app.service)
 ├── config/                  configuração padrão (nats.conf, postgresql.conf...)
 └── NOTES.md                 notas da versão
 ```
@@ -49,25 +50,26 @@ Verificado em 16/10/2026: minisign 0.12 (ISC), `github.com/jedisct1/go-minisign`
   "contracts": ["<produto>.telemetry/v1", "<produto>.event/v1", "<produto>.status/v1"],
   "files": {
     "appctl": "sha256:…",
-    "images/ingest-0.5.0.oci.tar": "sha256:…",
-    "quadlet/<produto>-ingest.container": "sha256:…"
+    "images/ingest-0.5.0.tar": "sha256:…",
+    "compose/compose.yaml": "sha256:…",
+    "compose/app.service": "sha256:…"
   }
 }
 ```
 
 - `files` lista **todo** arquivo do pacote, exceto o manifesto e a assinatura. Arquivo presente e fora da lista = pacote inválido.
-- `imageId` é o ID da imagem (digest do config), estável entre `save` e `load`; serve para conferir que a imagem carregada é a assinada.
+- `imageId` é o ID da imagem (digest do config), estável entre `save` e `load` (confira no Docker 29, que usa o image store do containerd: o ID mostrado por `docker image inspect` deve ser o mesmo nos dois lados; não verificado); serve para conferir que a imagem carregada é a assinada.
 - `minUpgradeFrom` impede pular versões que exigem migração intermediária.
 
 ## Imagens
 ```bash
 # build (CI): uma imagem por serviço, tag = versão do serviço
-podman save --format oci-archive -o images/ingest-0.5.0.oci.tar localhost/<produto>/ingest:0.5.0
-podman image inspect --format '{{.Id}}' localhost/<produto>/ingest:0.5.0   # vai para o manifesto
+docker save -o images/ingest-0.5.0.tar localhost/<produto>/ingest:0.5.0
+docker image inspect --format '{{.Id}}' localhost/<produto>/ingest:0.5.0   # vai para o manifesto
 
 # instalação (appliance)
-podman load -i images/ingest-0.5.0.oci.tar
-podman tag <imageId do manifesto> localhost/<produto>/ingest:0.5.0          # garante a tag que a unit usa
+docker load -i images/ingest-0.5.0.tar
+docker tag <imageId do manifesto> localhost/<produto>/ingest:0.5.0          # garante a tag que o compose.yaml usa
 ```
 
 - Um arquivo por imagem: o hash de cada uma fica no manifesto e a carga falha de forma isolada.
@@ -109,20 +111,20 @@ Ordem, com parada no primeiro erro:
 2. Extrair em `/var/lib/<produto>/packages/<versão>.tmp/` e conferir o SHA-256 de cada arquivo; arquivo sobrando ou faltando = falha. Renomear para `<versão>/` (atômico).
 3. Conferir compatibilidade: versão atual ≥ `minUpgradeFrom`; espaço em disco.
 4. **Backup antes de mudar** (atualização): dump do PostgreSQL conforme a política de backup; registrar a versão atual.
-5. `podman load` de cada imagem, conferir `imageId`, reaplicar tags.
-6. Gerar o que é por appliance só se ainda não existir: CA local, certificados, segredos (`podman secret create`). Reinstalar nunca troca segredos existentes.
-7. Copiar units para `/etc/containers/systemd/`, `systemctl daemon-reload`, rodar o generator em `--dryrun` antes.
-8. Subir em ordem; as units oneshot de migração rodam antes de cada serviço com banco.
-9. **Verificar saúde:** esperar todos `active` e `/readyz` ok, com timeout. Falhou → rollback automático (passo seguinte).
+5. `docker load` de cada imagem, conferir `imageId`, reaplicar tags.
+6. Instalar o Docker Engine e o plugin Compose dos `.deb` do pacote, se a versão fixada ainda não estiver instalada. Gerar o que é por appliance só se ainda não existir: CA local, certificados e segredos (arquivos em `/etc/<produto>/secrets/`, `0400`, dono igual ao UID do serviço, usados como `secrets:` do Compose). Reinstalar nunca troca segredos existentes.
+7. Copiar `compose.yaml` e a unit do systemd, validar com `docker compose config -q` e `systemctl daemon-reload`.
+8. Subir com `docker compose up -d --wait`; o Compose respeita `depends_on` e roda os serviços oneshot de migração antes de cada serviço com banco.
+9. **Verificar saúde:** o `--wait` espera os serviços *running*/*healthy*; confira também `/readyz` ok, com timeout. Falhou → rollback automático (passo seguinte).
 10. Atualizar `/var/lib/<produto>/packages/current` → `<versão>` (link simbólico, troca atômica) e registrar a instalação em `/var/lib/<produto>/packages/history.log`.
 
 - **Quem verifica:** na primeira instalação, o `appctl` que acompanha o pacote na mídia de instalação; na atualização, o `appctl` **já instalado** verifica o pacote novo e só depois executa o `appctl` contido nele para os passos seguintes. Nunca execute nada do pacote antes da verificação.
 - Mantenha as duas últimas versões em `/var/lib/<produto>/packages/`; apague as mais antigas.
 
 ## Rollback
-- `appctl rollback`: aponta `current` para a versão anterior, reinstala as units dela, `daemon-reload`, reinicia. As imagens antigas continuam carregadas.
+- `appctl rollback`: aponta `current` para a versão anterior, reinstala o `compose.yaml` e a unit dela, `daemon-reload`, `docker compose up -d --wait`. As imagens antigas continuam carregadas.
 - **Migração de banco é forward-only** (skill `sql-standards`): rollback do código funciona só se a migração da versão nova foi compatível com o código anterior (expand/contract). Migração incompatível exige restaurar o backup do passo 4; o `appctl` avisa e pede confirmação.
-- `appctl uninstall` remove units e imagens e mantém `/var/lib/<produto>` e `/etc/<produto>`; `--purge` apaga dados, com confirmação explícita.
+- `appctl uninstall` remove a unit, os containers (`docker compose down`, sem `-v`) e as imagens e mantém `/var/lib/<produto>` e `/etc/<produto>`; `--purge` apaga dados, com confirmação explícita.
 
 ## Testes obrigatórios
 - Alterar um byte de qualquer arquivo → instalação recusada.
@@ -136,7 +138,7 @@ Ordem, com parada no primeiro erro:
 ## Checklist de revisão
 - [ ] Verificação da assinatura acontece antes de extrair ou executar qualquer coisa.
 - [ ] Manifesto lista o SHA-256 de todo arquivo; nada fora da lista é aceito.
-- [ ] Imagens conferidas pelo ID e tag reaplicada; units com `Pull=never`.
+- [ ] Imagens conferidas pelo ID e tag reaplicada; `compose.yaml` com `pull_policy: never`.
 - [ ] Imagens de terceiros fixadas por digest.
 - [ ] Chave privada fora do repositório; chave pública embutida, com suporte a rotação.
 - [ ] Segredos e certificados gerados só se ausentes; dados fora do pacote.
