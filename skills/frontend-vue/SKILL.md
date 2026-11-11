@@ -83,9 +83,10 @@ if (error) throw toUiError(error)            // Problem Details → mensagem por
 - Rotas em lazy (`component: () => import(...)`), guard global `beforeEach` com `meta.requiresAuth`, filtros do dashboard na **query da URL** (compartilhável). Os data loaders ainda estão em `vue-router/experimental`: evite.
 
 ## UI e licenças
-- **Nuxt UI 4** (MIT, gratuito, Tailwind 4, funciona também em Vue + Vite) ou **shadcn-vue + Reka UI** (componentes copiados para o projeto) são o padrão.
-- **Vuetify 4** (MIT, Material 3) se o projeto já usa.
-- **PrimeVue 5 tem licença comercial**, que exige chave. A Community é gratuita só para equipes muito pequenas e com faturamento baixo. **Não adote sem decisão de licença registrada.** A 4.5.x continua MIT.
+- Projeto com biblioteca: use a dele. Sem biblioteca, o padrão é **Nuxt UI 4** (MIT, Tailwind 4, funciona também em Vue + Vite). Biblioteca primeiro; não recrie o que ela oferece (`design-system` §3).
+- **Alternativa para ERP com tabela pesada: PrimeVue 4.5.x com versão fixada** (MIT).
+- **PrimeVue 5 não:** licença própria com chave, paga acima de certo faturamento (https://cdn.jsdelivr.net/npm/primevue@5.0.4/LICENSE.md). Só com decisão de licença registrada.
+- **Vuetify 4** (MIT, Material 3) e shadcn-vue + Reka UI só se o projeto já usa.
 - **Gráficos:** `vue-echarts` 8 + ECharts 6.
   - Importe só os módulos usados (`use([...])`).
   - A `option` vai em `shallowRef`, e a atualização é incremental (`setOption({ series: [{ data }] }, { lazyUpdate: true })` ou `appendData`).

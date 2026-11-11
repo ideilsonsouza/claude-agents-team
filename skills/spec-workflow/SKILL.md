@@ -74,7 +74,7 @@ Regras: proibido critério vago ("rápido", "amigável"); use números e comport
 Status: rascunho | aprovado · Requisitos: requirements.md
 
 ## Modo e padrão
-Modo (`ui-ux` §1: Operar, Persuadir ou Ler) e padrão de tela (`ui-patterns`).
+Modo (`ui-ux` §1: Operar, Persuadir ou Ler) e padrão de tela (`ui-ux`).
 
 ## Fluxos
 Um flowchart Mermaid por história (H1…).

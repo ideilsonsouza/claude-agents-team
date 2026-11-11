@@ -80,7 +80,8 @@ Adaptado de `vercel-react-best-practices` (MIT). Regras que valem para a nossa s
 - **Cliente da API:** `openapi-typescript` + `openapi-fetch` (padrão da equipe), com `openapi-react-query` ou `queryOptions` próprios. **Orval** 8 quando quiser hooks e mocks gerados.
 
 ## UI
-- **shadcn/ui:** desde 07/2026 o `init` usa **Base UI** por padrão. Projeto novo fica em Base UI; projeto existente continua em Radix (há suporte total). Em CI, fixe a base (`-b`) para o `init` não trocá-la por conta própria.
+- **shadcn/ui** é o padrão. Adicione componentes pelo CLI (`npx shadcn add`) e **não reescreva** os gerados: customize por variantes e tokens (`@theme`). Tabela: **TanStack Table**. Gráficos: ECharts. Não crie componente que o shadcn já tem.
+- **shadcn/ui, base:** desde 07/2026 o `init` usa **Base UI** por padrão. Projeto novo fica em Base UI; projeto existente continua em Radix (há suporte total). Em CI, fixe a base (`-b`) para o `init` não trocá-la por conta própria.
 - **Tailwind 4:**
   - config no CSS (`@import "tailwindcss"; @theme { ... }`), sem `tailwind.config.js`;
   - plugin `@tailwindcss/vite`;

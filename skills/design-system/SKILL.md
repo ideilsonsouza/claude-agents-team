@@ -1,11 +1,11 @@
 ---
 name: design-system
-description: "Como construir e aplicar um design system: design tokens em 3 níveis (Tailwind 4 @theme ou CSS vars), escalas, cores semânticas, tema claro/escuro, componentes headless, Storybook e como evitar o \"kit de cards\" genérico. Usar ao criar tokens ou componentes base."
+description: "Adotar e tematizar uma biblioteca de componentes (Nuxt UI, shadcn/ui, PrimeVue) com design tokens: Tailwind 4 @theme, escalas, cores semânticas, tema claro/escuro. Biblioteca primeiro; primitivo próprio só sem alternativa. Usar ao criar tokens, tema ou componentes."
 ---
 
 # Design system
 
-> Se o projeto já tem design system (tokens, biblioteca de componentes, `@theme` do Tailwind, Figma), **use-o**: ele vence esta skill, a `ui-ux` e a `frontend-design`. Estas regras servem para criar ou evoluir um.
+> Se o projeto já tem design system (tokens, biblioteca de componentes, `@theme` do Tailwind, Figma), **use-o**: ele vence esta skill, a `ui-ux` e a `frontend-design`. O padrão é **adotar e tematizar uma biblioteca** (seção 3), não construir um sistema do zero. As regras de tokens valem para o tema dela.
 
 ## 1. Plano de tokens (antes do código)
 Ao criar um sistema ou tema novo, escreva primeiro um plano curto e revise-o com a pergunta "isto é o padrão de qualquer SaaS?" (o processo está em `ui-ux` §2):
@@ -47,24 +47,21 @@ São três níveis:
 - No escuro, a superfície mais elevada fica mais clara. Não basta inverter a paleta.
 
 ## 3. Componentes
-- **Primitivos acessíveis primeiro:** Button, Input, Select, Checkbox, Dialog, Toast, Tooltip, Tabs, Card, Table.
-- **Bases headless** (acessibilidade pronta, ver as skills de framework):
-  - React: **shadcn/ui com Base UI** (projeto novo) ou Radix (projeto existente);
-  - Vue: **Reka UI** (shadcn-vue) ou Nuxt UI 4.
-- **Em cada componente:**
-  - variantes: `primary`, `secondary`, `ghost`, `danger`;
-  - tamanhos: `sm`, `md`, `lg`;
-  - estados: hover, focus-visible, active, disabled, loading;
-  - hover, active e focus são **mais visíveis** que o repouso.
-- **API consistente:** o mesmo nome de prop para a mesma ideia. Prefira variantes explícitas e composição (slots, compound components) a uma pilha de props booleanas (`isPrimary`, `isCompact`, `hasIcon`…).
+**Biblioteca primeiro**, nesta ordem: (1) componente que já existe no projeto; (2) componente da biblioteca adotada; (3) composição de componentes da biblioteca; (4) componente novo só se nada acima resolve, justificado no relatório.
+- **Biblioteca padrão** (se o projeto não tem uma): Vue: Nuxt UI 4; React: shadcn/ui pelo CLI, sem reescrever os gerados (ver `frontend-vue` e `frontend-react`).
+- **CSS custom só nos tokens do tema** (`@theme` ou tema da biblioteca). Layout e ajustes com classes Tailwind; sem `.css`/`<style>` por componente, salvo exceção justificada.
+- **Primitivo próprio** (Button, Dialog, Table...) só sem alternativa na biblioteca. Nesse caso:
+  - bases headless: React com Base UI (novo) ou Radix; Vue com Reka UI;
+  - variantes (`primary`, `secondary`, `ghost`, `danger`), tamanhos (`sm`, `md`, `lg`) e estados (hover, focus-visible, active, disabled, loading); hover, active e focus mais visíveis que o repouso;
+  - API consistente: mesmo nome de prop para a mesma ideia; variantes explícitas e composição (slots) em vez de pilha de props booleanas.
 - **Foco:** `:focus-visible` com o token `--color-focus`. Nunca `outline: none` sem substituto.
-- **Card não é o padrão de layout.** Use-o para itens que se manipulam como unidade. Seções de página e grupos de campos não precisam virar cards.
+- **Card não é o padrão de layout.** Use-o para itens que se manipulam como unidade.
 
 ## 4. Documentação
-- Storybook (ou Histoire, para Vue) com cada variante e estado, e notas de uso (quando usar e quando não usar).
+- Storybook (ou Histoire, para Vue) **só para componentes próprios**, com cada variante e estado e notas de uso. Componente da biblioteca já tem documentação.
 - Uma página de tokens com amostras de cor e contraste, a escala tipográfica e os exemplos de raio e sombra.
 
 ## 5. Regras
 - Nenhum valor mágico no componente (`#3b82f6`, `13px`): use token.
-- Mudou um token, mudou o sistema todo. Componente novo só se nenhum existente resolver.
+- Mudou um token, mudou o sistema todo. Componente novo só se nenhum da biblioteca resolver.
 - Mudança de token ou componente-base é revisada com captura de tela, nos temas claro e escuro.

@@ -39,6 +39,7 @@ Só leitura, travada por hook: `git diff/log/show/blame/status`, `Read`, `Grep`,
 6. **Dados:** migration (carregue `sql-standards`): lock, reescrita de tabela, `CONCURRENTLY`, expand/contract, ordem de deploy, backfill.
 7. **Testes:** os testes provam o comportamento (asserção sobre resultado, não só "não lança")? Casos negativos aplicáveis presentes (skill `test-strategy`)? Algum teste foi pulado, afrouxado ou apagado (`git diff` nos arquivos de teste)? Teste de aceite do `qa` alterado pelo autor = bloqueante.
 8. **Evidência dos autores:** o relatório tem o portão mínimo (typecheck, lint, testes do módulo) com saída real? Falta = bloqueante ("não verificado").
+9. **Frontend/UI:** componente ou CSS recriando o que a biblioteca adotada já oferece, ou componente novo sem justificativa no relatório = achado **importante**.
 
 ## Classificação
 - **Bloqueante:** quebra critério de aceite ou contrato, bug provável em caminho real, falha de segurança, perda de dados, teste de aceite alterado, portão mínimo sem evidência.
