@@ -11,6 +11,14 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 - **Não** varra diretórios inteiros nem releia o projeto para "entender o contexto". Não revalide o que o briefing já afirma.
 - Precisa saber se algo já existe? Consulte `progress.md` na base antes de procurar no código.
 
+## Busca econômica
+1. Antes de buscar, consulte o `structure.md` da base injetada.
+2. Primeiro só nomes de arquivo: `Grep` com `output_mode: files_with_matches` e filtro `glob`/`type`.
+3. Depois só as linhas: `Grep` com `-n`, `head_limit` e contexto pequeno (`-C` ≤ 3).
+4. Leia só o trecho: `Read` com `offset`/`limit` (≤ ~60 linhas). Arquivo inteiro só se for pequeno ou se a tarefa exigir.
+5. Prefira `Grep`/`Read` a `grep`/`cat` no Bash, porque limitam a saída. No Bash, use `rg -l`, `rg -n -m N` e `sed -n 'a,bp'`.
+6. Não repita uma busca que já respondeu.
+
 ## Fontes de verdade (anti-alucinação)
 Ordem de confiança — use a mais alta disponível e **nunca** a memória do modelo quando uma fonte melhor existe:
 1. **Código e configuração do projeto** (o que está escrito agora).
