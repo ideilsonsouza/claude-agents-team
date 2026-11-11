@@ -51,47 +51,6 @@ MAX_LINHAS = 80  # teto de linhas por arquivo injetado
 LINHAS_TOTAL = 300  # teto de linhas de tudo que é injetado
 NUNCA_INJETAR = ("history.md",)  # log histórico: nunca entra no contexto, só sob demanda
 
-# Grafo central do graphify (piloto): ~/.claude/graphs/<slug>/, fora do repositório.
-AGENTES_GRAFO = ("architect", "backend", "frontend", "qa", "reviewer", "data-engineer", "dba", "docs")
-SCRIPT_GRAFO = pathlib.Path.home() / ".claude" / "scripts" / "grafo-atualizar.sh"
-
-
-def dir_grafo(raiz: pathlib.Path) -> pathlib.Path:
-    return pathlib.Path.home() / ".claude" / "graphs" / slug(raiz)
-
-
-def disparar_atualizacao_grafo(cwd: str, raiz: pathlib.Path) -> None:
-    """SessionStart: roda grafo-atualizar.sh desacoplado (não espera; o flock do script evita corrida)."""
-    try:
-        d = dir_grafo(raiz)
-        if not d.is_dir() or not SCRIPT_GRAFO.exists():
-            return
-        with open(d / "update.log", "a", encoding="utf-8") as log:
-            subprocess.Popen([str(SCRIPT_GRAFO), cwd], stdin=subprocess.DEVNULL, stdout=log, stderr=log,
-                             start_new_session=True, close_fds=True)
-    except Exception:
-        return
-
-
-def bloco_grafo(raiz: pathlib.Path) -> str:
-    """Bloco de até 6 linhas com o grafo central, só se graph.json existir."""
-    try:
-        d = dir_grafo(raiz)
-        grafo = d / "graphify-out" / "graph.json"
-        if not grafo.exists():
-            return ""
-        marca = d / ".main_commit"
-        data = datetime.datetime.fromtimestamp(marca.stat().st_mtime).strftime("%Y-%m-%d %H:%M") if marca.exists() else "data desconhecida"
-        return (f"## Grafo do código (graphify)\n"
-                f"Grafo: {grafo}\n"
-                f"Reflete a `main` (atualizado em {data}); mudanças da tarefa veja com `git diff`.\n"
-                f"Consultas: `graphify query \"<pergunta>\" --graph {grafo}` e "
-                f"`graphify explain \"<arquivo>::<símbolo>\" --graph {grafo}`.\n"
-                f"Consulte o grafo antes de varrer arquivos com grep, para achar onde algo está e o que depende dele.")
-    except Exception:
-        return ""
-
-
 def remote_origin(raiz: pathlib.Path) -> str:
     try:
         return subprocess.run(
@@ -229,7 +188,6 @@ def montar(dados: dict) -> tuple[str, str] | None:
                 base.mkdir(parents=True, exist_ok=True)
             except Exception:
                 pass
-            disparar_atualizacao_grafo(cwd, raiz)
             partes = [cabecalho]
             if not any((base / n).exists() for n in STEERING):
                 partes.append("**Projeto ainda sem base.** Antes da primeira tarefa, delegue ao `docs` o mapeamento inicial "
@@ -251,8 +209,6 @@ def montar(dados: dict) -> tuple[str, str] | None:
             if not corpo and not any((base / n).exists() for n in nomes_ag):
                 corpo = ["(projeto ainda sem base)"]
             partes = [intro, *corpo] if corpo else [cabecalho]  # sem corpo por orçamento: só o cabeçalho
-            if agente in AGENTES_GRAFO and (bg := bloco_grafo(raiz)):
-                partes.append(bg)  # fora do teto de arquivos
     except Exception:
         partes = [cabecalho]  # pior caso: ao menos o cabeçalho
     return evento, "\n\n".join(partes)

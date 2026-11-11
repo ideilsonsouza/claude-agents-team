@@ -42,7 +42,3 @@ O hook da equipe informa o perfil ("Perfil do projeto: equipe|solo"). Sem o hook
 
 ## Commits e PRs
 - Autor é sempre o usuário git autenticado. Sem `Co-Authored-By`, sem "Generated with ..." e sem link de sessão (atribuição desligada em `settings.json`).
-
-# graphify
-- **graphify** (`~/.claude/skills/graphify/SKILL.md`) - any input to knowledge graph. Trigger: `/graphify`
-When the user types `/graphify`, use the installed graphify skill or instructions before doing anything else.
