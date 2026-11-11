@@ -39,7 +39,7 @@ IFS=: read -r -a RAIZES <<<"$WORKSPACE_ROOTS"
 TMPDIR_LIMPEZA=$(mktemp -d)
 trap 'rm -rf "$TMPDIR_LIMPEZA"' EXIT
 
-TOTAL=0 # bytes liberados (apply) ou estimados (dry-run)
+TOTAL=0 # bytes liberados, medidos antes/depois (apply), ou estimados (dry-run)
 
 humano() { numfmt --to=iec --suffix=B "${1:-0}" 2>/dev/null || echo "${1:-0}B"; }
 titulo() { printf '\n== %s ==\n' "$1"; }
@@ -65,16 +65,32 @@ LIVRE_ANTES=$(disco_livre)
 # ---------------------------------------------------------------- Docker
 titulo "Docker: build cache com mais de $DOCKER_IDADE"
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-  # Soma as linhas reclamáveis do filtro (a coluna SIZE vem em B/kB/MB/GB).
-  EST=$(docker buildx du --filter "until=$DOCKER_IDADE" 2>/dev/null | awk '
-    $2=="true" { v=$3; u=v; gsub(/[0-9.]/,"",u); gsub(/[A-Za-z]/,"",v);
-      m=(u=="GB")?1073741824:(u=="MB")?1048576:(u=="kB"||u=="KB")?1024:1; s+=v*m }
-    END { printf "%.0f", s+0 }') || EST=0
-  echo "Reclamável estimado: $(humano "${EST:-0}")"
+  # O "buildx du --filter until=" IGNORA o filtro (testado: until=1h e until=168h devolvem o
+  # mesmo total), enquanto o "builder prune --filter until=" o respeita. Por isso a estimativa
+  # é calculada aqui, pela idade (LastUsedAt, relativo) de cada entrada reclamável.
+  HORAS_MIN=${DOCKER_IDADE%h}
+  docker_bytes() { # $1 = idade mínima em horas (0 = tudo que é reclamável)
+    docker buildx du --format '{{json .}}' 2>/dev/null | jq -r '
+      select(.Reclaimable)
+      | (.LastUsedAt | capture("(?<n>[0-9]+) (?<u>second|minute|hour|day|week|month|year)") // {n:"0",u:"second"}) as $a
+      | ($a.n|tonumber) * ({second:0.0003,minute:0.017,hour:1,day:24,week:168,month:720,year:8760}[$a.u]) as $h
+      | "\($h) \(.Size)"' | awk -v min="$1" '
+      $1>=min { v=$2; u=v; gsub(/[0-9.]/,"",u); gsub(/[A-Za-z]/,"",v);
+        m=(u=="GB")?1e9:(u=="MB")?1e6:(u=="kB"||u=="KB")?1e3:(u=="TB")?1e12:1; s+=v*m }
+      END { printf "%.0f", s+0 }'
+  }
+  EST=$(docker_bytes "$HORAS_MIN"); EST=${EST:-0}
+  echo "Reclamável estimado (>${DOCKER_IDADE}): $(humano "$EST") de $(humano "$(docker_bytes 0)") de cache total"
   if aplicando; then
+    ANTES_D=$(docker_bytes 0)
     docker builder prune -f --filter "until=$DOCKER_IDADE" | tail -1
+    DEPOIS_D=$(docker_bytes 0)
+    REAL_D=$((ANTES_D - DEPOIS_D)); [ "$REAL_D" -lt 0 ] && REAL_D=0
+    echo "Liberado (medido): $(humano "$REAL_D")"
+    somar "$REAL_D"
+  else
+    somar "$EST"
   fi
-  somar "${EST:-0}"
 else
   echo "Docker indisponível: pulado."
 fi
@@ -91,8 +107,7 @@ if [ -d "$GOCACHE_DIR" ]; then
       echo "AVISO: processo '$P' do usuário em execução; seção pulada. Rode com as sessões paradas."
       BLOQUEADO=$((BLOQUEADO + T))
     else
-      if aplicando; then go clean -cache; fi
-      somar "$T"
+      if aplicando; then go clean -cache; somar "$((T - $(tam "$GOCACHE_DIR")))"; else somar "$T"; fi
     fi
   else
     echo "Abaixo do limite: nada a fazer."
@@ -115,8 +130,7 @@ if [ -d "$NPMCACHE" ]; then
       echo "AVISO: processo '$P' do usuário em execução; seção pulada. Rode com as sessões paradas."
       BLOQUEADO=$((BLOQUEADO + T))
     else
-      if aplicando; then npm cache clean --force 2>&1 | tail -1; fi
-      somar "$T"
+      if aplicando; then npm cache clean --force 2>&1 | tail -1; somar "$((T - $(tam "$NPMCACHE")))"; else somar "$T"; fi
     fi
   else
     echo "Abaixo do limite: nada a fazer."
@@ -321,8 +335,8 @@ if [ "$N_CAND" -gt 0 ]; then echo "Remoção é decisão do dono: git worktree r
 titulo "Resumo"
 if aplicando; then
   LIVRE_DEPOIS=$(disco_livre)
-  echo "Liberado (soma dos itens): $(humano "$TOTAL")"
-  echo "Liberado (medido em /): $(humano $((LIVRE_DEPOIS - LIVRE_ANTES)))"
+  echo "Liberado (soma medida por item, antes/depois): $(humano "$TOTAL")"
+  echo "Liberado (variação de espaço livre em /; Docker, Go e npm ficam em /home): $(humano $((LIVRE_DEPOIS - LIVRE_ANTES)))"
 else
   echo "DRY-RUN: liberaria cerca de $(humano "$TOTAL") (sem contar worktrees nem bancos)."
   if [ "$BLOQUEADO" -gt 0 ]; then echo "Fora do total, bloqueado por processo ativo: $(humano "$BLOQUEADO") (rode com as sessões paradas)."; fi
