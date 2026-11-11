@@ -1,6 +1,6 @@
 ---
 name: backend-fastify-mqtt
-description: Cliente MQTT em serviço Fastify 5 com MQTT.js (mqtt 5.16) — plugin fastify-plugin com manualConnect/onReady/onClose, recepção com ack só após persistir via handleMessage (pump serial, backpressure, deadlock de publish no handler), sessão persistente MQTT 5 (sessionExpiryInterval, clientId estável por réplica), shared subscriptions, roteamento por tópico (mqtt-pattern), validação de payload e quarentena, idempotência, publicação de comandos (offline, timeout, message expiry, request/response), erros de auth e reconexão, health/readiness, métricas, graceful shutdown e testes (broker Mosquitto, Aedes, simulação de queda). Usar ao criar ou alterar código que usa o pacote mqtt num serviço Node.js/Fastify.
+description: "Cliente MQTT em serviço Fastify 5 com MQTT.js: plugin, ack só após persistir, backpressure, sessão persistente MQTT 5, shared subscriptions, validação, idempotência, comandos, reconexão, shutdown e testes. Usar ao criar ou alterar código que usa o pacote mqtt num serviço Node/Fastify."
 ---
 
 # MQTT em serviço Fastify (MQTT.js)

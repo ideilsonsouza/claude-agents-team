@@ -1,6 +1,6 @@
 ---
 name: security-go
-description: Segurança de Go 1.26/1.27 — govulncheck, gosec/golangci-lint, -race e fuzzing, integridade de módulos, net/http com timeouts e limites, os.Root contra path traversal, injeção (SQL, exec, templates), criptografia e TLS, panic e fail closed, build endurecido e imagem distroless. Usar ao blindar, auditar ou revisar código Go ou seus portões de CI.
+description: "Segurança de Go 1.26/1.27: govulncheck, gosec, -race, fuzzing, net/http com timeouts, os.Root, injeção, criptografia/TLS, build endurecido e distroless. Usar ao blindar, auditar ou revisar código Go ou seus portões de CI."
 ---
 
 # Blindagem em Go

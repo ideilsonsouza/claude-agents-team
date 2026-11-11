@@ -1,6 +1,6 @@
 ---
 name: security-hardening
-description: Ponto de entrada de segurança da equipe (Node, Go, Python) — OWASP Top 10:2025 e ASVS 5.0, modelo de ameaças, níveis de blindagem, auditoria em 8 passos, portões de CI, criptografia e senha (Argon2id), segredos e rotação, hardening de contêiner/systemd, runbook de incidente e checklist de PR. Usar ao blindar ou auditar um serviço, revisar segurança de PR, reagir a vazamento ou CVE crítica.
+description: "Ponto de entrada de segurança (Node, Go, Python): OWASP Top 10:2025, ASVS 5.0, modelo de ameaças, auditoria, portões de CI, criptografia, segredos, hardening e runbook de incidente. Usar ao blindar ou auditar serviço, revisar segurança de PR ou reagir a vazamento ou CVE crítica."
 ---
 
 # Blindagem de aplicação

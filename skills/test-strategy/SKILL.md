@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: Estratégia de testes da equipe para Go, Node/TypeScript (Fastify, AdonisJS, BullMQ, MQTT) e frontend (Vue, React, Astro) — nível certo de teste por tipo de mudança, testes de aceite escritos antes da implementação a partir dos critérios EARS, suíte negativa obrigatória (autorização, tenant cruzado, entrada inválida, duplicata, SSRF, webhook), dependências reais (serviços locais; no CI, da esteira), dados e fixtures determinísticos, testes instáveis e checklist de qualidade de teste. Usar ao planejar testes, escrever testes de aceite, validar entrega ou revisar se os testes provam o comportamento.
+description: "Estratégia de testes (Go, Node/TypeScript, frontend): nível certo por mudança, testes de aceite a partir dos critérios EARS, suíte negativa (autorização, tenant, SSRF), dependências reais, fixtures e testes instáveis. Usar ao planejar testes, escrever aceite, validar entrega ou revisar testes."
 ---
 
 # Estratégia de testes

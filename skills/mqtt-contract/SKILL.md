@@ -1,6 +1,6 @@
 ---
 name: mqtt-contract
-description: Contrato MQTT da equipe para dados de chão de fábrica — semântica do MQTT 5 que importa (QoS e duplicatas, sessão e expiry, retained, LWT/Will Delay, message expiry, receive maximum, ordem, shared subscriptions), desenho de tópicos em Unified Namespace ISA-95, separação telemetry/event/state/status/cmd, contrato de payload JSON (ts de origem, deviceId, seq/msgId para idempotência, unidade, qualidade, versão de schema, lote) e quando usar ou não Sparkplug B. Usar ao desenhar ou revisar tópicos, payloads, ACLs ou qualquer produtor/consumidor MQTT.
+description: "Contrato MQTT da equipe para dados de chão de fábrica: semântica do MQTT 5 (QoS, sessão, retained, LWT), tópicos em UNS ISA-95, payload JSON com ts, seq e qualidade, Sparkplug B. Usar ao desenhar ou revisar tópicos, payloads, ACLs ou produtor/consumidor MQTT."
 ---
 
 # Contrato MQTT (tópicos, payload e semântica)

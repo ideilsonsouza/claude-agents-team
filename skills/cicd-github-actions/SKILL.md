@@ -1,6 +1,6 @@
 ---
 name: cicd-github-actions
-description: Padrões de CI/CD com GitHub Actions para projetos Node.js/TypeScript com Docker — estrutura de workflows (CI, release, deploy), reusable workflows da org, cache, build e push no GHCR, tags e build once/deploy many, release-please, segurança (permissions, pinning por SHA, Dependabot, scan), environments e o que cada plano do GitHub libera em repo privado. Usar ao criar ou revisar arquivos em .github/workflows, dependabot.yml ou a esteira de release.
+description: "CI/CD com GitHub Actions para Node.js/TypeScript com Docker: workflows CI/release/deploy, reusable workflows, cache, GHCR, release-please, segurança (permissions, pinning por SHA, Dependabot) e environments. Usar ao criar ou revisar .github/workflows, dependabot.yml ou a esteira de release."
 ---
 
 # CI/CD com GitHub Actions

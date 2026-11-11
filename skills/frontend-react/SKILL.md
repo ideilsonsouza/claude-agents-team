@@ -1,6 +1,6 @@
 ---
 name: frontend-react
-description: Padrões para frontend em React 19.3 (e Next.js 16) — componentes e hooks, React Compiler 1.0 (sem memo manual), Actions/useActionState/useOptimistic, quando usar Server Components, SPA com Vite 8 + TanStack Router/React Router 8 como padrão para dashboard, TanStack Query 5 e Zustand, formulários com React Hook Form + Zod 4, cliente openapi-fetch, shadcn/ui (Base UI) e Tailwind 4, gráficos em tempo real fora do ciclo de render (useSyncExternalStore), testes com Vitest 5/Testing Library/Playwright/MSW 3, e Next 16 self-hosted em Docker (standalone, várias réplicas, cache compartilhado) com a lista de CVEs e versões mínimas.
+description: "Padrões para frontend em React 19 (e Next.js 16): hooks, React Compiler, Server Components, SPA com Vite + TanStack Router, TanStack Query, Zustand, React Hook Form + Zod, shadcn/ui, Tailwind 4, testes e Next self-hosted. Usar ao criar ou alterar código React/Next."
 ---
 
 # React (e Next.js)

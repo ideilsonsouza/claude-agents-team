@@ -1,6 +1,6 @@
 ---
 name: sandbox-isolated-vm
-description: Padrões para executar código não confiável em Node.js com isolated-vm — criação de Isolate e Context, limites de memória e tempo, transferência segura de dados (ExternalCopy, Reference, copy), exposição controlada de funções do host, descarte de recursos e testes de escape. Usar ao escrever ou revisar código que roda scripts de usuário, regras ou fórmulas dinâmicas com isolated-vm.
+description: "Executar código não confiável em Node.js com isolated-vm: Isolate/Context, limites de memória e tempo, transferência segura de dados, funções do host, descarte e testes de escape. Usar ao escrever ou revisar scripts de usuário, regras ou fórmulas dinâmicas com isolated-vm."
 ---
 
 # Sandbox com isolated-vm

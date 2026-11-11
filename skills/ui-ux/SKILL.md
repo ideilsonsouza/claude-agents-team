@@ -1,6 +1,6 @@
 ---
 name: ui-ux
-description: Princípios de UI/UX da equipe — modo da tela (Operar, Persuadir, Ler) e quanto de expressão visual cabe em cada um, direção visual sem "cara de IA" (sinais a evitar, plano em 2 passes, uma ousadia só), hierarquia e layout, estados de interface, formulários, feedback e motion, densidade de dados em dashboard, responsividade, acessibilidade WCAG 2.2 AA e escrita de interface em pt-BR.
+description: "Princípios de UI/UX: modo da tela (Operar, Persuadir, Ler), direção visual sem \"cara de IA\", hierarquia, estados, formulários, motion, densidade em dashboard, responsividade, WCAG 2.2 AA e escrita de interface em pt-BR. Usar ao projetar ou revisar telas."
 ---
 
 # UI/UX

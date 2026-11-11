@@ -1,6 +1,6 @@
 ---
 name: edge-gateway
-description: Gateway de borda (edge) que lê equipamentos industriais e envia telemetria a uma API central — leitura por polling (Modbus TCP/RTU, OPC UA, HTTP) com timeout e erro por tag sem derrubar o laço, relógio monotônico × de parede e operação sem NTP, dado bruto junto com o processado, contadores (delta, rollover, reset, reboot, ruído), deadband sem perder produção, escala versionada com snapshot de configuração, store-and-forward em SQLite (WAL, synchronous=FULL, limite, lote, apagar só após confirmação, backoff com jitter), idempotência (deviceId + bootId + seq), evolução só aditiva do contrato com dispositivos em campo e validação em sombra, OTA (A/B ou troca atômica, assinatura minisign/cosign, rollback por health, canais, rollout gradual, pinagem), heartbeat e diagnóstico, segurança (credencial por dispositivo, TLS, UI local, systemd endurecido), testes (simulador Modbus, queda de rede e energia, duplicata, contrato) e checklist de PR. Usar ao desenhar, implementar ou revisar o software de um gateway de borda, o endpoint de ingestão que o recebe ou o processo de atualização remota.
+description: "Software de gateway de borda que lê equipamentos industriais (Modbus, OPC UA) e envia telemetria à API central: polling, contadores, store-and-forward em SQLite, idempotência, OTA e segurança. Usar ao desenhar, implementar ou revisar o gateway, o endpoint de ingestão ou a atualização remota."
 ---
 
 # Gateway de borda (leitura, store-and-forward e OTA)

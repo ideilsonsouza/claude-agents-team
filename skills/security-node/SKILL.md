@@ -1,6 +1,6 @@
 ---
 name: security-node
-description: Segurança de Node.js/TypeScript (Fastify, AdonisJS, BullMQ) — versões suportadas, permission model e flags de runtime, timeouts contra DoS, prototype pollution, crypto e timing attack, injeção, SSRF com fetch/undici, headers, segredo no boot, vm não é sandbox, linters de segurança, imagem non-root e CVEs do Fastify. Usar ao blindar, auditar ou revisar código Node.
+description: "Segurança de Node.js/TypeScript (Fastify, AdonisJS, BullMQ): flags de runtime, timeouts, prototype pollution, crypto, injeção, SSRF, headers, segredos no boot, imagem non-root e CVEs do Fastify. Usar ao blindar, auditar ou revisar código Node."
 ---
 
 # Blindagem em Node.js

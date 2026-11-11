@@ -1,6 +1,6 @@
 ---
 name: backend-bullmq
-description: Padrões para filas e workers com BullMQ 6 (Node.js/TypeScript sobre Redis) — conexão (ioredis como peer explícito), produção de jobs, retries e backoff, idempotência e deduplicação (inclui keepLastIfActive), job schedulers (substituem repeat), concorrência, rate limit, stalled jobs, sandboxed processors, graceful shutdown, telemetria e migração v5→v6. Usar ao criar ou alterar Queue, Worker, FlowProducer, job schedulers ou jobs em projetos com bullmq.
+description: "Padrões para filas e workers com BullMQ 6 (Node/TypeScript sobre Redis): conexão, retries, idempotência, job schedulers, concorrência, rate limit, stalled jobs, graceful shutdown e migração v5→v6. Usar ao criar ou alterar Queue, Worker, FlowProducer ou jobs com bullmq."
 ---
 
 # BullMQ

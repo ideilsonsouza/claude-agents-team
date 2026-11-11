@@ -1,6 +1,6 @@
 ---
 name: backend-fastify
-description: Padrões para backend em Fastify 5 (Node.js/TypeScript) — estrutura buildApp/server, encapsulamento e fastify-plugin, decorators da v5, ciclo de vida e hooks, validação e serialização com type provider Zod/TypeBox (allowlist de resposta), erros, logging pino e LogController, produção atrás do Traefik (trustProxy, keepAliveTimeout, timeouts, shutdown), segurança e CVEs, ecossistema @fastify/* com versões, testes com inject/Vitest/serviços locais e preparação para a v6.
+description: "Padrões para backend em Fastify 5 (Node/TypeScript): buildApp, plugins, hooks, validação com Zod/TypeBox, erros, pino, produção atrás do Traefik, segurança/CVEs, ecossistema @fastify/* e testes com inject/Vitest. Usar ao criar ou alterar código Fastify."
 ---
 
 # Backend em Fastify

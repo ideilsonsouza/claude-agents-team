@@ -1,6 +1,6 @@
 ---
 name: backend-drizzle
-description: Padrões para Drizzle ORM (TypeScript) com PostgreSQL — versão estável 0.45.x (≥ 0.45.2 pela CVE-2026-39356) e preparo para a 1.0 (RQB v2/defineRelations, casing por tabela, nova pasta de migrations, validators em drizzle-orm/zod). Cobre schema em pg-core, índices e constraints, migrations com drizzle-kit (armadilha de timestamp entre branches), migrator fora do boot, ingestão em lote idempotente, TimescaleDB, transações, SQL bruto seguro e testes. Usar ao criar ou alterar tabelas, gerar ou aplicar migrations, escrever queries ou transações em projetos com drizzle-orm ou drizzle.config.ts.
+description: "Padrões para Drizzle ORM com PostgreSQL: schema pg-core, índices, migrations com drizzle-kit, ingestão em lote idempotente, TimescaleDB, transações, SQL bruto seguro e testes. Usar ao criar tabelas, gerar migrations ou escrever queries em projetos com drizzle-orm ou drizzle.config.ts."
 ---
 
 # Drizzle ORM

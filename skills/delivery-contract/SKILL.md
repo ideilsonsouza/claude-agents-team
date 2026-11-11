@@ -16,7 +16,7 @@ description: Formato padrão do relatório que todo especialista da equipe devol
 2. Primeiro só nomes de arquivo: `Grep` com `output_mode: files_with_matches` e filtro `glob`/`type`.
 3. Depois só as linhas: `Grep` com `-n`, `head_limit` e contexto pequeno (`-C` ≤ 3).
 4. Leia só o trecho: `Read` com `offset`/`limit` (≤ ~60 linhas). Arquivo inteiro só se for pequeno ou se a tarefa exigir.
-5. Prefira `Grep`/`Read` a `grep`/`cat` no Bash, porque limitam a saída. No Bash, use `rg -l`, `rg -n -m N` e `sed -n 'a,bp'`.
+5. Agentes com Bash no Linux não recebem as ferramentas `Grep`/`Glob` (comportamento do Claude Code). Use o `grep`/`find` do Bash com limites: `grep -rl`, `grep -n -m N`, `rg -l`/`rg -n -m N`, `sed -n 'a,bp'`. Nunca `cat` de arquivo grande.
 6. Não repita uma busca que já respondeu.
 
 ## Fontes de verdade (anti-alucinação)

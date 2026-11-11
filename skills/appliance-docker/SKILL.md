@@ -1,6 +1,6 @@
 ---
 name: appliance-docker
-description: Serviços em containers em servidor on-premise (appliance) com Docker Engine + Compose v2 + systemd (exemplo de alvo - Ubuntu Server 24.04) — instalação pelo repositório oficial com versão fixada, compose.yaml com restart unless-stopped, healthcheck e depends_on service_healthy, unit do systemd que sobe e desce o projeto (up -d --wait / down), rede e volumes nomeados, stop_grace_period, logs com driver local e rotação, endurecimento (usuário não-root, read_only, cap_drop ALL, no-new-privileges, tmpfs, userns-remap e rootless com o custo de cada um), segredos por arquivo 0400 como secrets do Compose, migração oneshot antes do serviço, operar offline (pull_policy never, docker load), atualização e rollback por tag fixada e digest, e armadilhas (porta publicada que fura o firewall, unhealthy que não reinicia, mode de secret ignorado). Usar ao escrever ou revisar o compose.yaml e a unit do appliance, subir serviços em servidor on-premise ou depurar um serviço que não sobe.
+description: "Serviços em containers num servidor on-premise (appliance) com Docker Engine, Compose v2 e systemd: compose.yaml, healthcheck, unit, endurecimento, segredos, operação offline, atualização e rollback. Usar ao escrever ou revisar compose/unit do appliance ou depurar serviço que não sobe."
 ---
 
 # Docker + Compose em servidor on-premise

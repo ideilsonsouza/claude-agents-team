@@ -1,6 +1,6 @@
 ---
 name: deploy-dokploy
-description: Deploy em Dokploy self-hosted (Docker Swarm + Traefik) — Application com fonte Docker (imagem do GHCR), desligar auto-deploy e disparar pelo CI, API (x-api-key, application.update/deploy, deployment.all, rollback), CLI oficial, Swarm settings em nanossegundos (healthcheck, UpdateConfig start-first/rollback, StopGracePeriod), variáveis por projeto/ambiente e armadilhas conhecidas (deploy "done" sem healthcheck). Usar ao escrever pipeline que publica no Dokploy, configurar um app nele ou executar deploy/rollback.
+description: "Deploy em Dokploy self-hosted (Swarm + Traefik): Application com imagem do GHCR, auto-deploy desligado e disparo pelo CI, API/CLI, Swarm settings, rollback e armadilhas. Usar ao escrever pipeline que publica no Dokploy, configurar um app nele ou executar deploy/rollback."
 ---
 
 # Deploy no Dokploy

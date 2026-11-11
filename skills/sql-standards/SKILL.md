@@ -1,6 +1,6 @@
 ---
 name: sql-standards
-description: Padrões de banco de dados da equipe (PostgreSQL 18, com notas para MySQL 8.4) — modelagem (PK identity x uuidv7, tipos, enums, nomes de constraints, FK com índice, FK composta com tenant, unicidade case-insensitive, NULLS NOT DISTINCT, constraints temporais), migrations seguras com zero downtime (lock de cada DDL, o que reescreve a tabela, lock_timeout e retry, CONCURRENTLY e índice INVALID, UNIQUE/FK sem lock longo, expand/contract, backfill em lotes, ordem de deploy, política forward-only, squawk no CI), índices e padrões de consulta, runbook de correção de dados em produção, grants e LGPD, e checklist de revisão de migration.
+description: "Padrões de banco (PostgreSQL 18, notas MySQL 8.4): modelagem, migrations seguras com zero downtime, locks, índices, expand/contract, correção de dados em produção, grants, LGPD e checklist de revisão. Usar ao modelar tabelas, escrever ou revisar migrations e consultas."
 ---
 
 # Padrões SQL e migrations

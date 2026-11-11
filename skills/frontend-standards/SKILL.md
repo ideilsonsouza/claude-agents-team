@@ -1,6 +1,6 @@
 ---
 name: frontend-standards
-description: Padrões gerais de frontend da equipe, válidos para Vue, React e Astro — escolha de arquitetura (SPA Vite x Nuxt/Next x Astro), ferramental base (TypeScript 6.0 até a API do TS 7.1, Vite 8, ESLint 10 flat, Vitest 5, Playwright, MSW 3, pnpm com proteção de supply chain), cliente tipado do OpenAPI, estados de UI, tempo real (SSE, buffer + rAF, gráficos), datas no fuso da planta, performance (Core Web Vitals, bundle, cache, compressão sem quebrar SSE), acessibilidade WCAG 2.2 AA com axe, segurança (XSS, CSP, cookies, segredos no bundle), telemetria de erros (GlitchTip/Sentry, OTel web) e checklist de PR.
+description: "Padrões gerais de frontend (Vue, React, Astro): escolha SPA x Nuxt/Next x Astro, ferramental (TypeScript, Vite, ESLint, Vitest, Playwright), cliente OpenAPI, tempo real, performance, acessibilidade WCAG 2.2, segurança e checklist de PR. Usar ao criar ou revisar frontend."
 ---
 
 # Padrões de frontend

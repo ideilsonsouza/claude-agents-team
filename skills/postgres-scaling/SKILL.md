@@ -1,6 +1,6 @@
 ---
 name: postgres-scaling
-description: Escala e operação de PostgreSQL 18 + TimescaleDB 2.30 self-hosted (Docker/Swarm, Coolify/Dokploy) — orçamento de conexões, PgBouncer 1.26 em transaction mode (o que quebra), timeouts por role, tuning base para VPS, autovacuum/bloat/wraparound, diagnóstico (pg_stat_statements, auto_explain, locks, pg_stat_io), réplicas de leitura com Drizzle withReplicas, HA e failover, particionamento (pg_partman) x hypertable, TimescaleDB a fundo (chunk interval, columnstore/hypercore, continuous aggregates, retenção, ingestão em lote), backup físico com PITR (pgBackRest) e restore testado, Redis como cache, checklist operacional e thresholds de alerta. Usar ao dimensionar, configurar, diagnosticar, escalar ou operar um banco Postgres/TimescaleDB, ou ao planejar backup e DR.
+description: "Escala e operação de PostgreSQL 18 + TimescaleDB self-hosted: conexões, PgBouncer, tuning, autovacuum, diagnóstico, réplicas, particionamento, hypertables, backup PITR com pgBackRest. Usar ao dimensionar, configurar, diagnosticar ou operar Postgres/TimescaleDB, ou planejar backup e DR."
 ---
 
 # PostgreSQL e TimescaleDB em escala

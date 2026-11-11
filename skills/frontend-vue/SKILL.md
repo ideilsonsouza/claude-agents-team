@@ -1,6 +1,6 @@
 ---
 name: frontend-vue
-description: Padrões para frontend em Vue 3.5 (e Nuxt 4) — script setup com TypeScript, recursos 3.4/3.5 (defineModel, props destructure, useTemplateRef, useId, onWatcherCleanup), reatividade para dados grandes (shallowRef, markRaw), Vapor do 3.6 ainda em RC, Pinia 4 para estado de UI, Pinia Colada ou TanStack Vue Query para dados de servidor, Vue Router 5 com rotas tipadas, cliente openapi-fetch, bibliotecas de UI e licenças (PrimeVue 5 comercial), ECharts com vue-echarts, SSE com VueUse 15, testes com Vitest 5/test-utils/Playwright, TS 6 + vue-tsc e ESLint 10, e Nuxt 4 (app/, useFetch, quando usar).
+description: "Padrões para frontend em Vue 3.5 (e Nuxt 4): script setup com TypeScript, reatividade, Pinia, Pinia Colada/TanStack Query, Vue Router, openapi-fetch, PrimeVue, ECharts, SSE, testes com Vitest e Nuxt. Usar ao criar ou alterar código Vue/Nuxt."
 ---
 
 # Vue 3 (e Nuxt)

@@ -1,6 +1,6 @@
 ---
 name: frontend-astro
-description: Padrões para Astro 7 — quando usar (site, marketing, docs, blog x app), arquitetura de ilhas e diretivas client:* e server:defer, componentes .astro, content collections com Content Layer, integrações Vue/React, estático por padrão com SSR por rota, adapter Node standalone em Docker com várias réplicas (sessão em Redis), astro:env, imagens, i18n, CSP, e breaking changes das versões 6 e 7 (compilador em Rust, Markdown, compressHTML).
+description: "Padrões para Astro 7: ilhas e diretivas client:*, content collections, integrações Vue/React, estático com SSR por rota, adapter Node em Docker, astro:env, imagens, i18n, CSP e breaking changes 6/7. Usar ao criar ou alterar site, marketing, docs ou blog em Astro."
 ---
 
 # Astro

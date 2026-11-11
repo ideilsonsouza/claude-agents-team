@@ -1,6 +1,6 @@
 ---
 name: deploy-cloudflare
-description: Publicar frontend (SPA Vue/React/Vite ou site estático Astro) na Cloudflare como Worker com Static Assets (`wrangler deploy`), que é o padrão da casa, e NÃO como Cloudflare Pages (`wrangler pages deploy`). Cobre a regra de decisão ("hospedar no Cloudflare Pages" dito informalmente = Workers Static Assets), wrangler.jsonc modelo (SPA, site estático, Worker mínimo com run_worker_first), headers de segurança (_headers, CSP, HSTS) e o fallback de SPA, CI com `wrangler deploy --dry-run`, deploy no GitHub Actions (portão, secrets, URL via WRANGLER_OUTPUT_FILE_PATH, verificação com curl), custom domain x routes, workers.dev e preview URLs, rollback, migração Pages para Workers e armadilhas. Usar ao escrever pipeline de frontend na Cloudflare, ao ouvir "Cloudflare Pages", "publicar frontend", "wrangler", "workers.dev", "site estático" ou "SPA", e ao migrar projeto Pages.
+description: "Publicar frontend (SPA Vite ou site Astro) na Cloudflare como Worker com Static Assets (`wrangler deploy`), não Pages: wrangler.jsonc, headers, CI no GitHub Actions, domínio, rollback e migração de Pages. Usar ao ouvir \"Cloudflare Pages\", \"wrangler\", \"workers.dev\", \"publicar frontend\" ou \"SPA\"."
 ---
 
 # Frontend na Cloudflare: Worker com Static Assets

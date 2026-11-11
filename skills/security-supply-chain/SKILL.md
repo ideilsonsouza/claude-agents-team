@@ -1,6 +1,6 @@
 ---
 name: security-supply-chain
-description: Cadeia de suprimentos (OWASP A03:2025) para npm/pnpm, Go e PyPI — lições dos worms de npm 2025–2026, install scripts e cooldown, lockfile reprodutível, trusted publishing por OIDC, SBOM, proveniência e cosign, hardening de GitHub Actions, scanners de CI e resposta a pacote comprometido. Usar ao adicionar ou atualizar dependência, publicar pacote/imagem ou revisar workflow de CI.
+description: "Cadeia de suprimentos (OWASP A03:2025) para npm/pnpm, Go e PyPI: install scripts, cooldown, lockfile, OIDC, SBOM, cosign, hardening de GitHub Actions e resposta a pacote comprometido. Usar ao adicionar ou atualizar dependência, publicar pacote/imagem ou revisar workflow de CI."
 ---
 
 # Cadeia de suprimentos

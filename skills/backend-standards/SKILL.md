@@ -1,6 +1,6 @@
 ---
 name: backend-standards
-description: Padrões gerais de backend da equipe, válidos para Go, Fastify e AdonisJS — design de API HTTP (status codes, erros RFC 9457 Problem Details, paginação por cursor, filtros por allowlist, PATCH com Merge Patch, concorrência com ETag/If-Match, versionamento e depreciação com Deprecation/Sunset, formatos de data, dinheiro e IDs), contrato OpenAPI no CI (lint, breaking change, cliente tipado), segurança pelo OWASP API Top 10 (BOLA, mass assignment, SSRF, limites), autenticação (sessão x JWT, refresh rotativo), senhas com Argon2id, CORS e headers, arquitetura em camadas com DI manual e erros tipados, observabilidade mínima, testes (autorização obrigatória) e checklist de PR.
+description: "Padrões gerais de backend (Go, Fastify, AdonisJS): design de API HTTP, erros RFC 9457, paginação, OpenAPI no CI, OWASP API Top 10, autenticação, Argon2id, camadas, observabilidade e checklist de PR. Usar ao projetar ou revisar APIs e backends."
 ---
 
 # Padrões de backend

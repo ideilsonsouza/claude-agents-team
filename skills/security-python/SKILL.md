@@ -1,6 +1,6 @@
 ---
 name: security-python
-description: Segurança de Python (FastAPI, Django, Flask, workers) — versões suportadas, uv com hashes, pip-audit, ruff/bandit/semgrep, desserialização insegura, injeção e SSTI, path traversal e tarfile, SSRF, criptografia e JWT, produção no FastAPI/Django, runtime e imagem non-root. Usar ao blindar, auditar ou revisar código Python.
+description: "Segurança de Python (FastAPI, Django, Flask, workers): uv com hashes, pip-audit, ruff/bandit/semgrep, desserialização, injeção/SSTI, path traversal, SSRF, JWT e imagem non-root. Usar ao blindar, auditar ou revisar código Python."
 ---
 
 # Blindagem em Python

@@ -1,6 +1,6 @@
 ---
 name: observability
-description: Observabilidade e performance para serviços Node.js/TypeScript da equipe (Fastify 5, BullMQ 6, MQTT.js, Postgres/TimescaleDB) em Docker Swarm self-hosted — OpenTelemetry SDK 2.x com ESM e @fastify/otel, instrumentação de pg/ioredis/undici/pino/BullMQ, propagação de trace no MQTT 5 via User Properties, OTel Collector, stack self-hosted (Grafana + Prometheus 3 + Loki + Tempo + Alloy; alternativa VictoriaMetrics), métricas RED/USE/runtime/fila/MQTT e cardinalidade, logs pino com redact (LGPD), alertas por SLO com burn rate (Sloth), uptime externo, teste de carga com k6 2.x (xk6-mqtt, emqtt-bench) e profiling (@platformatic/flame, Pyroscope). Usar ao instrumentar um serviço, montar a stack de monitoramento, escrever alertas e dashboards, rodar teste de carga ou investigar lentidão e vazamento de memória.
+description: "Observabilidade e performance de serviços Node.js (Fastify, BullMQ, MQTT.js, Postgres): OpenTelemetry, Grafana/Prometheus/Loki/Tempo, métricas, logs pino, alertas por SLO, k6, profiling. Usar ao instrumentar serviço, montar monitoramento, escrever alertas ou investigar lentidão e vazamento."
 ---
 
 # Observabilidade e performance

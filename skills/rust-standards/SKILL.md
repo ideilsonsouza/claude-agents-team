@@ -1,6 +1,6 @@
 ---
 name: rust-standards
-description: Padrões para Rust 1.99 com edição 2024 — toolchain e MSRV (rust-toolchain.toml, rust-version, resolver 3), estrutura de crate e workspace com lints herdados, erros (thiserror em biblioteca, anyhow em binário), async com tokio (cancelamento e cancel safety, JoinSet, TaskTracker e CancellationToken, shutdown ordenado com SIGTERM, backpressure com canal limitado, spawn_blocking), axum 0.8, serde tolerante para contrato aditivo, configuração, SQLite com rusqlite ou sqlx (WAL, synchronous, migrations, durabilidade em queda de energia), tracing, testes (unitários, integração, proptest, insta, nextest, tempo pausado), clippy pedante seletivo, rustfmt, cargo-deny e cargo-audit, cross-compile para Raspberry Pi (cargo-zigbuild ou cross, gnu x musl, binário estático), perfil de release (lto, strip, panic=abort), unsafe e FFI com C/C++ (cxx, bindgen, cbindgen) e checklist de PR. Usar ao criar ou alterar código em projetos com Cargo.toml.
+description: "Padrões para Rust (edição 2024): toolchain, workspace, erros, async com tokio, axum, serde, SQLite, tracing, testes, clippy, cargo-deny, cross-compile para Raspberry Pi, unsafe/FFI. Usar ao criar ou alterar código em projetos com Cargo.toml."
 ---
 
 # Rust

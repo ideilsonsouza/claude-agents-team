@@ -1,6 +1,6 @@
 ---
 name: appliance-offline-package
-description: Pacote de instalação e atualização offline do appliance on-premise — layout do .tar (manifesto, imagens, compose e unit do systemd, configuração, migrações, instalador), manifesto com SHA-256 de cada arquivo e a combinação de versões dos serviços, imagens com docker save/load (um arquivo por imagem, tag reaplicada pelo ID), assinatura com minisign (Ed25519) e verificação embutida no instalador em Go (go-minisign), chave pública embutida e rotação de chave, cosign como alternativa e por que pesa offline, instalação atômica em /var/lib/<produto>/packages/<versão> com link current, ordem de instalação, rollback para a versão anterior, preservação de dados e testes de adulteração. Usar ao montar, assinar, validar, instalar ou atualizar o pacote do appliance, ou ao revisar o appctl.
+description: "Pacote de instalação e atualização offline do appliance on-premise: .tar com manifesto SHA-256, imagens docker save/load, assinatura minisign, instalador em Go, instalação atômica e rollback. Usar ao montar, assinar, validar, instalar ou atualizar o pacote do appliance, ou revisar o appctl."
 ---
 
 # Pacote offline do appliance

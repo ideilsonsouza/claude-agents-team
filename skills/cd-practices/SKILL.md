@@ -1,6 +1,6 @@
 ---
 name: cd-practices
-description: Práticas de entrega contínua para serviços Node.js em contêiner (Docker/Swarm + Traefik, Coolify, Dokploy) — build once/deploy many, versionamento e rollback por imagem, healthcheck como readiness, graceful shutdown (PID 1, SIGTERM, stop grace period, BullMQ worker.close), compatibilidade de contrato entre serviços (expand/contract, ordem de deploy, jobs na fila), ambientes, verificação pós-deploy, cadeia de suprimentos e checklist "pronto para CD". Usar ao desenhar ou revisar a esteira de deploy de um serviço ou ao preparar um serviço para CD.
+description: "Entrega contínua para serviços Node.js em contêiner (Swarm + Traefik, Coolify, Dokploy): build once/deploy many, rollback por imagem, healthcheck, graceful shutdown, expand/contract e checklist \"pronto para CD\". Usar ao desenhar ou revisar a esteira de deploy ou preparar um serviço para CD."
 ---
 
 # Práticas de CD

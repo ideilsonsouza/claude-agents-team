@@ -1,6 +1,6 @@
 ---
 name: architecture-scalability
-description: Arquitetura e escalabilidade para a stack da equipe (Node/Fastify, Postgres/TimescaleDB, Redis/BullMQ, MQTT, Docker Swarm) — monólito modular em monorepo com processos separados (api/worker/ingest/scheduler), critérios para separar serviço, fronteiras de módulo no CI, serviços sem estado e escala horizontal no Swarm (orçamento de conexões, memória do V8), confiabilidade (outbox/inbox, Idempotency-Key, timeout, retry com jitter, circuit breaker, bulkhead, backpressure, load shedding, rate limit), cache (cache-aside, stampede, invalidação), multi-tenant com RLS, quando adotar Kafka/NATS/Redis Streams e licenças, SLO/capacidade com template de NFRs e checklist de revisão. Usar ao desenhar ou revisar arquitetura, decidir separação de serviços, planejar escala ou escrever a seção de NFRs do design.md.
+description: "Arquitetura e escalabilidade (Node/Fastify, Postgres/TimescaleDB, Redis/BullMQ, MQTT, Swarm): monólito modular, separação de serviços, escala horizontal, confiabilidade, cache, multi-tenant com RLS, SLO e NFRs. Usar ao desenhar ou revisar arquitetura, planejar escala ou escrever NFRs do design.md."
 ---
 
 # Arquitetura e escalabilidade

@@ -1,6 +1,6 @@
 ---
 name: ui-review
-description: Auditoria de código de interface (Vue, React, Astro) contra um checklist fixo de acessibilidade, foco, formulários, animação, tipografia, conteúdo, imagens, performance, navegação na URL, toque, tema escuro, i18n, hidratação, estados de hover e copy em pt-BR, com achados no formato arquivo:linha. Use para "revisar a UI", "auditar acessibilidade", "revisar UX" ou como passo de revisão de PR de frontend.
+description: "Auditoria de código de interface (Vue, React, Astro) contra checklist de acessibilidade, foco, formulários, animação, performance, tema escuro, i18n e copy pt-BR, com achados em arquivo:linha. Usar em \"revisar a UI\", \"auditar acessibilidade\", \"revisar UX\" ou revisão de PR de frontend."
 argument-hint: <arquivo-ou-padrão>
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: backend-go
-description: Padrões para backend em Go 1.26/1.27 — versões suportadas e go.mod (go/toolchain/tool), novidades 1.23–1.27 que mudam o código (iteradores, os.Root, WaitGroup.Go, GOMAXPROCS por cgroup, errors.AsType, json/v2, uuid, synctest), estrutura cmd/internal com run(ctx) e shutdown ordenado, config, HTTP com ServeMux/chi e timeouts, OpenAPI (huma, oapi-codegen), erros e contexto, concorrência com errgroup e backpressure, pgx 5 + sqlc + goose, COPY e ingestão idempotente, MQTT 5 com paho.golang (ack após persistir), filas com River, slog/OTel/Prometheus/pprof, testes (serviços locais, synctest), golangci-lint v2, govulncheck e Dockerfile distroless. Usar ao criar ou alterar código em projetos com go.mod.
+description: "Padrões para backend em Go 1.26/1.27: go.mod, estrutura cmd/internal, HTTP, OpenAPI, erros, concorrência, pgx + sqlc + goose, MQTT, River, slog/OTel, testes, golangci-lint e Dockerfile distroless. Usar ao criar ou alterar código em projetos com go.mod."
 ---
 
 # Go

@@ -1,6 +1,6 @@
 ---
 name: mqtt-broker
-description: Escolha, configuração e operação de broker MQTT para chão de fábrica — comparativo Mosquitto 2.1 x EMQX 6 (licença BSL, cluster pago) x HiveMQ CE x NanoMQ, mosquitto.conf seguro (plugins password/acl da 2.1, limites, persistência), EMQX em Docker/Swarm (node name fixo, ACL deny-all, shared subscription e redispatch), autenticação por dispositivo, ACL de menor privilégio, TLS/mTLS, exposição via Traefik/Coolify/Dokploy, CVEs, monitoramento, backup e teste de carga. Usar ao subir, configurar, expor, monitorar ou escolher um broker MQTT.
+description: "Escolha, configuração e operação de broker MQTT para chão de fábrica: Mosquitto x EMQX x HiveMQ CE x NanoMQ, config segura, ACL, TLS/mTLS, Docker/Swarm, exposição via Traefik, monitoramento e backup. Usar ao subir, configurar, expor, monitorar ou escolher um broker MQTT."
 ---
 
 # Broker MQTT

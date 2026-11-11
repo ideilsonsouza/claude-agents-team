@@ -1,6 +1,6 @@
 ---
 name: design-system
-description: Como construir e aplicar um design system — design tokens em 3 níveis (Tailwind 4 @theme ou variáveis CSS), plano de tokens antes do código, escalas de espaço, tipografia, raio e sombra por hierarquia, cores semânticas e paleta de gráficos, tema claro/escuro (color-scheme, theme-color), componentes headless por framework, estados e variantes, documentação no Storybook e regras para não cair no "kit de cards" genérico.
+description: "Como construir e aplicar um design system: design tokens em 3 níveis (Tailwind 4 @theme ou CSS vars), escalas, cores semânticas, tema claro/escuro, componentes headless, Storybook e como evitar o \"kit de cards\" genérico. Usar ao criar tokens ou componentes base."
 ---
 
 # Design system

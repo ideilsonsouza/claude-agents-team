@@ -1,6 +1,6 @@
 ---
 name: find-skills
-description: Descobre e instala skills do ecossistema aberto (skills.sh) — lê o projeto para identificar a stack, compara com as skills já instaladas em ~/.claude/skills, busca na API do skills.sh (curl ou npx skills find), avalia confiança e segurança lendo o conteúdo inteiro, e instala via gh com commit fixado só depois da confirmação do usuário. Use quando o usuário perguntar "tem skill para X?", "procure skills para este projeto" ou quiser ampliar as capacidades do agente.
+description: "Descobre e instala skills do ecossistema aberto (skills.sh): lê a stack do projeto, compara com as skills instaladas, busca na API, avalia segurança e instala só após confirmação. Usar em \"tem skill para X?\" ou \"procure skills para este projeto\"."
 ---
 
 # Encontrar skills

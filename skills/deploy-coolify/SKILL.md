@@ -1,6 +1,6 @@
 ---
 name: deploy-coolify
-description: Deploy em Coolify v4 self-hosted — tipos de recurso (Dockerfile x Docker Image), desligar auto-deploy e disparar pelo CI, API (tokens e permissões, /deploy, status, rollback, PATCH da tag, envs), GHCR privado, rolling update e healthcheck, stop grace period, workers sem HTTP, NODE_ENV no build e armadilhas conhecidas. Usar ao escrever pipeline que publica no Coolify, ao configurar um app no Coolify ou ao executar deploy/rollback nele.
+description: "Deploy em Coolify v4 self-hosted: Dockerfile x Docker Image, auto-deploy desligado e disparo pelo CI, API (tokens, /deploy, rollback), GHCR privado, healthcheck e armadilhas. Usar ao escrever pipeline que publica no Coolify, configurar um app nele ou executar deploy/rollback."
 ---
 
 # Deploy no Coolify (v4)
