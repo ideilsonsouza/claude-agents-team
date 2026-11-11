@@ -8,7 +8,6 @@ tools: Read, Glob, Grep, Write, Edit, WebSearch, WebFetch, Skill
 skills:
   - delivery-contract
   - ui-ux
-  - ui-patterns
 memory: user
 color: pink
 hooks:
