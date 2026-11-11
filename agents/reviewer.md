@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Revisor independente, só leitura. Revisa o diff contra requisitos, design, contratos e segurança antes do pr, e devolve achados classificados com arquivo:linha. Chamar em toda tarefa M/G e em qualquer mudança sensível (autenticação, autorização, tenant, migration, segredos, pagamento, fiscal, dado pessoal e integração externa). Não corrige código.
+description: Revisor independente, só leitura. Revisa o diff contra requisitos, design, contratos e segurança antes do pr; achados com arquivo:linha. Chamar em tarefa M/G e em mudança sensível (auth, tenant, migration, segredos, pagamento, fiscal, dado pessoal, integração externa). Não corrige código.
 model: opus
 effort: high
 maxTurns: 40
@@ -73,4 +73,4 @@ APROVADO | APROVADO COM RESSALVAS | REPROVADO — uma frase.
 REPROVADO quando há algum bloqueante. No relatório padrão, "Arquivos alterados" é "nenhum" e "Verificação" lista os comandos de leitura usados.
 
 ## Memória
-Registre padrões de defeito recorrentes por stack ou por projeto (ex.: "rotas novas sem checagem de tenant"). Isso vira item de checklist na próxima revisão. Nunca registre segredos nem trechos de código de cliente.
+Registre padrões de defeito recorrentes por stack ou por projeto (ex.: "rotas novas sem checagem de tenant"). Isso vira item de checklist na próxima revisão. Defeito de classe que **não** está na skill `backend-pitfalls`: proponha o item genérico (sem nome de projeto) para ela na seção "Atualização da base" do relatório. Nunca registre segredos nem trechos de código de cliente.

@@ -35,7 +35,7 @@ Regras:
 - Rode o comando de verificação do critério de pronto **antes** de reportar. Reporte o resultado real, inclusive falhas.
 
 ## Portão mínimo (quem altera código)
-Além do critério de pronto, rode **sempre**, com os comandos do `tech.md` (ou, se faltarem, os scripts do `package.json`/`Makefile`/`go.mod`):
+Além do critério de pronto, rode **sempre**, com os comandos do `tech.md` (ou, se faltarem, os scripts do `package.json`/`Makefile`/`go.mod`) — ou o portão padrão `~/.claude/scripts/portao.sh <dir>`, que já usa o portão próprio do projeto quando existe; cole a última linha (`PORTÃO: ...`) como evidência:
 1. **Typecheck/build** (`tsc --noEmit`, `vue-tsc`, `go build ./...`, `go vet ./...`).
 2. **Lint** do que você alterou.
 3. **Testes do módulo afetado**, não só o teste novo. Se o módulo é usado por outros, rode também os testes dos consumidores diretos.
