@@ -162,6 +162,137 @@ def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL, linhas_resta
     return saida
 
 
+# Agentes de código que recebem a linha de stack detectada.
+AGENTES_STACK = {"backend", "native", "qa", "reviewer", "frontend", "devops", "dba"}
+IGNORAR_DIRS = {"node_modules", ".git", ".worktree", "vendor", "dist"}
+MAX_LEITURAS = 30  # teto de arquivos lidos na detecção
+SKILLS_DIR = pathlib.Path.home() / ".claude" / "skills"
+DEPS_NODE = (  # (dependência, rótulo, skill)
+    ("fastify", "Fastify", "backend-fastify"), ("@adonisjs/core", "AdonisJS", "backend-adonisjs"),
+    ("bullmq", "BullMQ", "backend-bullmq"), ("drizzle-orm", "Drizzle", "backend-drizzle"),
+    ("mqtt", "MQTT.js", "backend-fastify-mqtt"), ("vue", "Vue", "frontend-vue"),
+    ("react", "React", "frontend-react"), ("astro", "Astro", "frontend-astro"),
+)
+BACKEND_NODE = {"backend-fastify", "backend-adonisjs", "backend-bullmq", "backend-drizzle", "backend-fastify-mqtt"}
+
+
+MAX_CANDIDATOS = 200  # teto de diretórios examinados (stat/glob) na detecção
+NOME_SEGURO = re.compile(r"[A-Za-z0-9._@-]+")  # nome de diretório só entra no contexto se casar
+
+
+def _dirs_candidatos(cwd: pathlib.Path) -> list[pathlib.Path]:
+    """Raiz, filhos diretos e filhos de apps/packages/services (sem pastas ignoradas), até MAX_CANDIDATOS."""
+    def filhos(d: pathlib.Path) -> list[pathlib.Path]:
+        saida = []
+        try:
+            for c in d.iterdir():
+                if c.name in IGNORAR_DIRS or c.name.startswith(".") or not c.is_dir():
+                    continue
+                saida.append(c)
+                if len(saida) >= MAX_CANDIDATOS:
+                    break
+        except OSError:
+            pass
+        return sorted(saida)
+    saida = [cwd]
+    for c in filhos(cwd):
+        if len(saida) >= MAX_CANDIDATOS:
+            break
+        saida.append(c)
+        if c.name in ("apps", "packages", "services"):
+            saida += filhos(c)[:MAX_CANDIDATOS - len(saida)]
+    return saida
+
+
+def detectar_stack(cwd: str) -> str:
+    """Uma linha com a stack do projeto e as skills existentes a carregar. Vazio se nada for detectado.
+
+    Só lê manifestos pequenos (teto MAX_LEITURAS), sem subprocess. Erros de I/O viram "não existe".
+    """
+    raiz = pathlib.Path(cwd).resolve()
+    leituras = 0
+
+    def ler_pequeno(arq: pathlib.Path) -> str | None:
+        nonlocal leituras
+        if leituras >= MAX_LEITURAS:
+            return None
+        try:
+            if not arq.is_file():
+                return None
+            leituras += 1
+            with open(arq, encoding="utf-8", errors="replace") as f:
+                return f.read(200_000)
+        except OSError:
+            return None
+
+    itens: list[str] = []
+    skills: list[str] = []
+
+    def add(rotulo: str, d: pathlib.Path, *nomes: str) -> None:
+        rel = "" if d == raiz else d.relative_to(raiz).as_posix()
+        # caminho vai cru ao contexto: só aceita nomes seguros (senão omite o caminho)
+        if d == raiz:
+            loc = "raiz/"
+        elif all(NOME_SEGURO.fullmatch(parte) for parte in rel.split("/")):
+            loc = rel + "/"
+        else:
+            loc = ""
+        itens.append(f"{rotulo} ({loc})" if loc else rotulo)
+        skills.extend(nomes)
+
+    for d in _dirs_candidatos(raiz):
+        if (t := ler_pequeno(d / "go.mod")) is not None:
+            m = re.search(r"^go\s+(\d+(?:\.\d+)*)", t, re.M)
+            add(f"Go {m.group(1)}" if m else "Go", d, "backend-go", "security-go")
+        if (t := ler_pequeno(d / "package.json")) is not None:
+            try:
+                pj = json.loads(t)
+                if not isinstance(pj, dict):
+                    raise ValueError
+                deps: dict = {}
+                for chave in ("devDependencies", "dependencies"):
+                    bloco = pj.get(chave)
+                    if isinstance(bloco, dict):
+                        deps.update(bloco)
+            except (ValueError, TypeError):
+                deps = {}
+            achados = [(r, sk, deps[dep]) for dep, r, sk in DEPS_NODE if dep in deps]
+            if achados:
+                rotulos = []
+                for r, _, ver in achados:
+                    mj = re.search(r"\d+", str(ver))
+                    rotulos.append(f"{r} {mj.group(0)}" if mj and r in ("Vue", "React", "Astro", "Fastify") else r)
+                if "vite" in deps and any(r == "Vue" for r, _, _ in achados):
+                    rotulos.append("Vite")
+                sks = [sk for _, sk, _ in achados]
+                if BACKEND_NODE & set(sks):
+                    sks.append("security-node")
+                add(" + ".join(rotulos), d, *sks)
+        if ler_pequeno(d / "Cargo.toml") is not None:
+            add("Rust", d, "rust-standards")
+        pyproj = ler_pequeno(d / "pyproject.toml")
+        try:
+            reqs = sorted(d.glob("requirements*.txt"))[:3]
+        except OSError:
+            reqs = []
+        if pyproj is not None or reqs:
+            blob = "\n".join(x for x in [pyproj, *[ler_pequeno(r) for r in reqs]] if x).lower()
+            fws = [rot for fw, rot in (("fastapi", "FastAPI"), ("django", "Django"))
+                   if re.search(rf"(?<![\w-]){fw}(?![\w-])", blob)]
+            add("Python/" + "+".join(fws) if fws else "Python", d, "backend-python", "security-python")
+        if (t := ler_pequeno(d / "composer.json")) is not None and "laravel/framework" in t:
+            add("Laravel", d, "backend-laravel")
+
+    try:
+        unicas = [s for i, s in enumerate(skills) if s not in skills[:i] and (SKILLS_DIR / s / "SKILL.md").is_file()]
+    except OSError:
+        unicas = []
+    if not itens:
+        return ""
+    carregar = f" → carregue: {', '.join(unicas)}" if unicas else ""
+    return f"Stack detectada: {', '.join(itens)}{carregar}"
+
+
 def montar(dados: dict) -> tuple[str, str] | None:
     evento = dados.get("hook_event_name")
     agente = dados.get("agent_type") or ""
@@ -209,6 +340,12 @@ def montar(dados: dict) -> tuple[str, str] | None:
             if not corpo and not any((base / n).exists() for n in nomes_ag):
                 corpo = ["(projeto ainda sem base)"]
             partes = [intro, *corpo] if corpo else [cabecalho]  # sem corpo por orçamento: só o cabeçalho
+            if agente in AGENTES_STACK:
+                try:
+                    if stack := detectar_stack(cwd):
+                        partes.append(stack)
+                except Exception:
+                    pass
     except Exception:
         partes = [cabecalho]  # pior caso: ao menos o cabeçalho
     return evento, "\n\n".join(partes)
