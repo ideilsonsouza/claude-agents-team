@@ -1,11 +1,11 @@
 ---
 name: industrial-timeseries-etl
-description: Análise de dados brutos e escrita de lógicas de curadoria (ETL) sobre séries temporais industriais — tipos de sinal e como agregar cada um (gauge por média ponderada no tempo, contador por soma de deltas com reset e rollover, estado por duração e paradas, eventos com deduplicação), qualidade (bom/incerto/ruim, sentinelas, ausência não é zero), tempo (UTC, janelas tumbling, amostra anterior à janela, recorte, teto para buracos, atraso, duplicata, fuso e horário de verão), indicadores (disponibilidade, MTBF/MTTR, OEE, produção, vazão, consumo específico), agregação em camadas (numerador e denominador, nunca média de médias), determinismo e reprocessamento, limites de sandbox, testes (conjunto dourado, borda, reconciliação, propriedades) e checklist "lógica pronta para ativar". Usar ao analisar dado bruto de sensores/PLC, definir métrica ou indicador, escrever ou revisar lógica de curadoria, ou desenhar ETL de telemetria.
+description: "Análise de dados brutos e lógicas de curadoria (ETL) de séries temporais industriais: agregação por tipo de sinal, qualidade, tempo/UTC, OEE, MTBF/MTTR, reprocessamento e testes. Usar ao analisar dado de sensores/PLC, definir indicador, escrever ou revisar lógica de curadoria ou ETL de telemetria."
 ---
 
 # ETL de séries temporais industriais (lógicas de curadoria)
 
-Padrão da equipe, genérico. Fórmulas dos indicadores e exemplos de cálculo em `references/indicadores.md`. Fontes ao fim.
+Padrão da equipe, genérico. Fórmulas dos indicadores em `references/indicadores.md`. O detalhe (código, exemplos, seções longas) fica em `references/`; o gatilho de cada arquivo está na seção 'Referências' abaixo.
 - Se existir contrato da plataforma do projeto (skill de projeto ou `team-state/<slug>/curadoria.md`: entrada, saída, limites, nomes), ele manda no formato. Esta skill manda no **método**; a seção 11 traz o contrato típico de uma lógica em sandbox e o template.
 - Testes em geral: `test-strategy`. Execução de script não confiável: `sandbox-isolated-vm`. Consulta analítica em ClickHouse: `clickhouse-best-practices`. Origem do dado no campo: `edge-gateway`.
 
@@ -26,144 +26,12 @@ Padrão da equipe, genérico. Fórmulas dos indicadores e exemplos de cálculo e
 | Estado/status | rodando, parado, alarme | **duração por estado**, transições, paradas | contar amostras em vez de tempo |
 | Evento | RFID, apontamento, pesagem | contagem, **deduplicação**, janela | contar leitura repetida como evento novo |
 
-### 2.1 Gauge: média ponderada no tempo
 
-Cada amostra vale desde o seu instante até a próxima, limitada a um teto (`maxGapMs`). Só amostra boa contribui; o intervalo sem cobertura fica fora do denominador.
+Regras por tipo (código e detalhe em `references/agregacao-por-tipo.md`): gauge = média ponderada no tempo com teto de buraco e cobertura; contador = soma de deltas (rollover só perto do topo, reset contado, salto impossível descartado); estado = duração recortada na janela, parada conta onde começa; evento = deduplicado por chave e bloqueio.
 
-```js
-// samples: [{t: msUTC, v: number, q: 'good'|'uncertain'|'bad'}] ordenadas por t; pode ter 1 amostra antes de t0
-function twa(samples, t0, t1, maxGapMs) {
-  let num = 0, den = 0;
-  for (let i = 0; i < samples.length; i++) {
-    const s = samples[i];
-    if (s.q !== 'good') continue;                       // incerto/ruim não entra (ver seção 3)
-    const next = i + 1 < samples.length ? samples[i + 1].t : t1; // a próxima amostra, qualquer qualidade, encerra a validade
-    const start = Math.max(s.t, t0);                    // recorte: não conta fora da janela
-    const end = Math.min(next, s.t + maxGapMs, t1);     // teto para buraco
-    if (end > start) { num += s.v * (end - start); den += end - start; }
-  }
-  return { avg: den > 0 ? num / den : null, coveredMs: den, windowMs: t1 - t0 };
-}
-```
-
-`coveredMs / windowMs` é a **cobertura**. Abaixo de um mínimo definido na spec (ex.: 80%), a saída é `null` ou sai marcada como parcial.
-
-### 2.2 Contador/totalizador: soma de deltas
-
-```js
-// política de reset: 'skip' (conservador) ou 'fromZero' (assume que o contador zerou logo antes da amostra)
-function counterSum(samples, t0, t1, { modulo = null, maxRatePerS = Infinity, onReset = 'skip' } = {}) {
-  let sum = 0, prev = null; const d = { resets: 0, rollovers: 0, rejected: 0, frozenSteps: 0, used: 0 };
-  for (const s of samples) {
-    if (s.q === 'bad' || !Number.isFinite(s.v)) continue;   // contador é cumulativo: pular amostra ruim não perde produção
-    if (prev && s.t >= t0 && s.t < t1) {                    // o delta pertence à janela da amostra mais nova
-      let delta = s.v - prev.v;
-      if (delta < 0) {
-        if (modulo && prev.v > 0.9 * modulo && s.v < 0.1 * modulo) { delta += modulo; d.rollovers++; }
-        else { d.resets++; delta = onReset === 'fromZero' ? s.v : 0; }
-      }
-      if (delta > maxRatePerS * (s.t - prev.t) / 1000) { d.rejected++; delta = 0; } // salto impossível (glitch)
-      if (delta === 0) d.frozenSteps++;
-      sum += delta; d.used++;
-    }
-    prev = s;
-  }
-  return { value: d.used > 0 ? sum : null, ...d };
-}
-```
-
-Regras:
-- **Rollover**: contador de 16 bits vira em 65536 (`modulo`), 32 bits em 4294967296. Só trate como rollover se o valor anterior estava perto do topo **e** o novo perto de zero; senão é reset.
-- **Reset** (queda sem rollover: troca de turno manual, reinício do PLC, troca de equipamento): decida na spec entre ignorar o intervalo (`skip`) e assumir que o valor novo foi produzido desde o reset (`fromZero`). Registre quantos resets ocorreram.
-- **Totalizador congelado**: delta zero por muito tempo com o estado "rodando" indica totalizador travado ou comunicação mascarada. Não corrija; sinalize em diagnóstico (`frozenSteps`) e decida na spec.
-- **Salto impossível**: delta acima da taxa física máxima (`maxRatePerS`) é descartado e contado.
-- O delta é atribuído à janela da amostra mais nova. Ele cobre o buraco inteiro entre as duas amostras (vantagem do contador sobre o gauge), mas isso pode concentrar produção de vários minutos numa hora. Se a spec exigir distribuição, reparta o delta pro-rata pelo tempo e documente.
-- Escala (fator, offset) aplica-se ao **valor** antes do delta, com o fator vigente na época (versão de configuração).
-
-### 2.3 Estado: duração, transições e paradas
-
-```js
-function stateRuns(samples, t0, t1, maxGapMs) {            // trechos contínuos de um mesmo estado, recortados na janela
-  const runs = [];
-  for (let i = 0; i < samples.length; i++) {
-    const s = samples[i];
-    if (s.q === 'bad') continue;
-    const next = i + 1 < samples.length ? samples[i + 1].t : t1;
-    const start = Math.max(s.t, t0), end = Math.min(next, s.t + maxGapMs, t1);
-    if (end <= start) continue;
-    const last = runs[runs.length - 1];
-    if (last && last.state === s.v && last.end === start) last.end = end;
-    else runs.push({ state: s.v, start, end, openStart: s.t < t0 });
-  }
-  return runs;
-}
-
-function stateFacts(runs, { runningStates, minStopMs }) {
-  const f = { run_ms: 0, stopped_ms: 0, other_ms: 0, stops: 0, micro_stops: 0, transitions: Math.max(0, runs.length - 1) };
-  for (const r of runs) {
-    const dur = r.end - r.start;
-    if (runningStates.includes(r.state)) f.run_ms += dur;
-    else if (r.state === 'stopped') {
-      f.stopped_ms += dur;
-      if (!r.openStart) (dur >= minStopMs ? f.stops++ : f.micro_stops++);   // parada conta na janela em que começa
-    } else f.other_ms += dur;
-  }
-  return f;
-}
-```
-
-- **Limiar mínimo de parada** (`minStopMs`): parada mais curta é micro-parada. Defina o limiar com a operação (valores típicos: 1 a 5 minutos). Micro-paradas reduzem o desempenho no OEE; paradas acima do limiar reduzem a disponibilidade. O tempo das duas entra em `stopped_ms`.
-- Estado derivado de gauge (ex.: "rodando" se corrente > limiar): use **histerese** (limiar de entrada diferente do de saída) e tempo mínimo de permanência para não gerar centenas de transições com ruído.
-- Parada que atravessa a janela: o tempo é repartido pelas janelas; o **contador de paradas** conta só na janela onde ela começou (`openStart` marca o trecho herdado). Isso mantém a soma de janelas igual ao total.
-- Estados desconhecidos (código fora do mapa) entram em `other_ms`; nunca presuma "parado" nem "rodando".
-
-### 2.4 Eventos (RFID, apontamento, pesagem)
-
-- Chave de deduplicação: o identificador do evento (`ticket`, `tag + sequência`); sem identificador, `(origem, tag, instante arredondado ao período de re-leitura)`.
-- Leitura repetida da mesma tag dentro de um período de **bloqueio** (ex.: 5 s) é a mesma passagem.
-- Conte por janela do **instante do evento** (relógio do equipamento, quando confiável; senão o de recebimento, registrando qual foi usado).
-- Evento atrasado cai na janela do seu instante e obriga o recálculo dela (seção 5).
-- Pesagem estática: use só leitura **estável** (flag do indicador ou variação abaixo de X por Y s); líquido = bruto − tara; dedupe por ticket.
-
-```js
-function dedupe(events, keyFn, blockMs) {                   // ordena por t e mantém o 1º de cada chave dentro do bloqueio
-  const lastSeen = new Map(), out = [];
-  for (const e of [...events].sort((a, b) => a.t - b.t || (a.id > b.id ? 1 : -1))) {
-    const k = keyFn(e), prev = lastSeen.get(k);
-    if (prev === undefined || e.t - prev >= blockMs) { out.push(e); lastSeen.set(k, e.t); }
-  }
-  return out;
-}
-```
-
-## 3. Qualidade do dado
-
-| Qualidade | Tratamento padrão |
-|---|---|
-| Boa (`good`) | entra |
-| Incerta (`uncertain`) | **fora** por padrão; entra só se a spec disser (ex.: sensor com substituição de valor) e fica contada em diagnóstico |
-| Ruim (`bad`) | fora; encerra a validade do valor anterior |
-
-- Mapeie os códigos do equipamento/protocolo para os três níveis **na spec** (ex.: OPC UA: bit 6-7 do StatusCode; Modbus não tem qualidade, então derive de timeout, faixa e frescor).
-- **Sentinelas**: `-1`, `9999`, `65535`, `0xFFFF`, `NaN`, `null`, `-32768` marcam "sem leitura" em muitos equipamentos. Liste as do equipamento na spec e trate como `bad`, nunca como valor.
-- **Faixa física**: fora de `[min, max]` do instrumento → `bad` (ou saturação, se for comportamento conhecido). Salto impossível entre amostras consecutivas (taxa de variação) → suspeito.
-- **Valor congelado** (idêntico por muito tempo): normal para estado, setpoint e temperatura estável; suspeito para vazão em processo rodando, contador de equipamento em operação e qualquer sinal com ruído natural. Só aceite congelado quando a spec disser que é esperado e por quanto tempo; senão marque como incerto.
-- **Zero legítimo × ausência**: vazão zero com equipamento parado é dado; ausência de amostra é buraco. Sem cobertura, `null`.
-- Registre **contagem de amostras descartadas por motivo** (`bad`, faixa, sentinela, duplicata, fora de ordem). Descarte sem contagem esconde problema de campo.
-
-## 4. Tempo e janelas
-
-- **UTC no armazenamento e no cálculo**, em milissegundos inteiros (`number`). Fuso é só apresentação e fronteira de dia/turno.
-- **Janela tumbling por hora, `[t0, t1)`**: início fechado, fim aberto. Amostra em `t1` pertence à janela seguinte. `t0 = Math.floor(t / 3600000) * 3600000`.
-- **Amostra anterior à janela** fecha a borda: a última amostra antes de `t0` segura o valor até a primeira da janela (sujeita ao teto). Sem ela, o início da janela fica sem cobertura. A lógica recebe uma margem de lookback (ex.: `maxGapMs` antes de `t0`).
-- **Recorte (clip)**: cada intervalo é recortado em `[t0, t1)` antes de somar (`max(s.t, t0)` e `min(next, t1)`); assim o mesmo segundo nunca conta em duas janelas.
-- **Teto para buracos**: `maxGapMs = fator × intervalo_típico` (fator 2 a 5, definido pelo perfil). Além do teto o valor não é segurado; o tempo vira "sem cobertura". Não preencha buraco por conveniência.
-- **Fora de ordem**: ordene por `t` dentro da lógica; não presuma ordem de chegada.
-- **Duplicata por timestamp**: mesmo `t` com valores diferentes → regra explícita (ex.: a última recebida vence; igualdade exata é descartada) e contagem em diagnóstico.
-- **Dado atrasado**: chega depois de a janela ser calculada. A lógica não sabe disso; o pipeline recalcula a janela quando chega dado com `t` nela. Exija idempotência (seção 6).
-- **Relógio do equipamento × recebimento**: PLC sem NTP deriva. Se o gateway carimba o instante de leitura, prefira-o; compare com o recebimento e sinalize deriva acima de um limite. Instante no futuro (além de tolerância) é `bad`.
-- **Dia e turno por fuso**: a lógica recebe janelas já resolvidas em UTC; a conversão (fuso da planta, horário de verão, turnos) fica fora do script, no host. Não dependa de `Intl` dentro do sandbox. Por isso a **base é a hora em UTC**: um dia com 23 ou 25 horas continua somando janelas horárias corretamente. Fuso com deslocamento de 30/45 min não alinha com a hora cheia em UTC; use janelas de 15 min ou confirme com a spec.
-- Turno que atravessa a meia-noite pertence ao dia em que **começa**, salvo definição contrária da área.
+## 3-4. Qualidade, tempo e janelas (resumo; completo em `references/qualidade-e-tempo.md`)
+- Só `good` entra; `uncertain` fora por padrão; sentinelas e fora de faixa = `bad`; descarte sempre contado por motivo.
+- UTC em ms; janela `[t0, t1)`; recorte antes de somar; amostra anterior fecha a borda; teto `maxGapMs` para buraco; ordene por `t`; dado atrasado recalcula a janela; fuso e turno ficam no host.
 
 ## 5. Indicadores industriais (resumo; fórmulas em `references/indicadores.md`)
 
@@ -177,35 +45,11 @@ function dedupe(events, keyFn, blockMs) {                   // ordena por t e ma
 | Taxa nominal | capacidade de projeto/ordem | desempenho > 100% costuma indicar nominal errado |
 | Consumo específico | energia ou insumo ÷ produção | numerador e denominador no mesmo período e cobertura |
 
-Mineração e britagem: balança de correia entrega taxa instantânea (t/h) e totalizador (t). Produção = soma de deltas do **totalizador**; a taxa serve para diagnóstico e para a vazão quando rodando. Os dois devem reconciliar (integral da taxa ≈ delta do totalizador, dentro de tolerância). Caldeira: produção específica de vapor (kg de vapor por kg de combustível), pressão e temperatura por média ponderada no tempo. Balança estática: eventos de pesagem (seção 2.4).
 
-Métrica com efeito **fiscal, financeiro ou contratual** (faturamento, comissão, bonificação, imposto) passa por validação humana antes de ativar.
+Métrica com efeito **fiscal, financeiro ou contratual** passa por validação humana antes de ativar. Balança de correia, caldeira e pesagem estática: ver `references/camadas-e-indicadores.md`.
 
-## 6. Agregação em camadas
-
-1. **Fato por janela** (hora), calculado do bruto. Cada fato é **aditivo** (soma entre janelas) ou **não aditivo** (precisa dos componentes).
-2. **Rollup** (turno, dia, mês) soma os **aditivos** e recalcula os não aditivos.
-
-| Aditivo (guardar e somar) | Não aditivo (recalcular) |
-|---|---|
-| toneladas, kWh, peças, minutos rodando/parado/cobertos, nº de paradas | média, vazão média, disponibilidade, OEE, % qualquer, MTBF, MTTR |
-
-```js
-function rollup(hourFacts) {
-  const sum = k => hourFacts.reduce((a, f) => a + (f[k] ?? 0), 0);
-  const tons = sum('tons'), runMin = sum('run_min'), plannedMin = sum('planned_min'), stops = sum('stops');
-  return {
-    tons, run_min: runMin, planned_min: plannedMin, stops,
-    tph_running: runMin > 0 ? tons / (runMin / 60) : null,          // recalculado do numerador e denominador
-    availability: plannedMin > 0 ? runMin / plannedMin : null,
-    mttr_min: stops > 0 ? sum('stopped_min') / stops : null,
-  };
-}
-```
-
-**Nunca** tire média de médias nem de percentuais: 2 h a 100 t/h e 10 min a 200 t/h não dão 150 t/h. Guarde `numerador` e `denominador` como fatos de cada janela (ex.: `tons` e `run_min`), e o percentual como conveniência.
-
-**Saída de cada fato**: `valor`, `unidade`, e atributos de diagnóstico: `cobertura` (0 a 1), `amostras_usadas`, `descartes` por motivo, `resets`, `versao_logica`. Nomes em `snake_case` com a unidade no nome (`tons`, `run_min`, `tph`), estáveis (renomear quebra consumidores).
+## 6. Agregação em camadas (resumo)
+Fato por janela (hora) calculado do bruto; rollup soma os **aditivos** (toneladas, kWh, minutos, nº de paradas) e **recalcula** os não aditivos (médias, %, OEE, MTBF). **Nunca** média de médias. Saída com `valor`, `unidade`, `cobertura`, `amostras_usadas`, `descartes`, `versao_logica`; nomes `snake_case` estáveis. Código e exemplo: `references/camadas-e-indicadores.md`.
 
 ## 7. Determinismo, idempotência e reprocessamento
 
@@ -225,45 +69,8 @@ function rollup(hourFacts) {
 - **Log curto e útil**: uma linha de resumo por janela (`h=2025-03-01T10Z n=3598 cov=0.99 drop=2 resets=0 tons=412.3`). Nada de log por amostra.
 - Falhe de forma explícita: erro de dados vira `null` + diagnóstico; só exceção para entrada malformada.
 
-## 9. Testes da lógica
-
-1. **Conjunto dourado**: janela pequena, escrita à mão, resultado calculado à mão e comentado (o leitor refaz a conta). É o contrato de comportamento.
-2. **Casos de borda** (um teste cada): parada total, buraco maior que o teto, reset, rollover, amostra ruim e sentinela, janela vazia, amostra exatamente em `t0` e em `t1`, amostra anterior à janela, dado atrasado (resultado igual ao com dado em ordem), duplicata de timestamp, fora de ordem, uma única amostra, valor congelado, estado desconhecido.
-3. **Gerador determinístico** (PRNG com semente) para volume e propriedades:
-
-```js
-function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
-  t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-
-function genGauge(seed, t0, t1, meanStepMs) {                // amostragem irregular, com buracos e ruins
-  const r = mulberry32(seed), out = []; let t = t0 - meanStepMs;
-  while (t < t1) { t += Math.floor(meanStepMs * (0.2 + 1.6 * r())) + (r() < 0.02 ? 10 * meanStepMs : 0);
-    out.push({ t, v: 100 * r(), q: r() < 0.03 ? 'bad' : 'good' }); }
-  return out;
-}
-```
-
-4. **Propriedades** (rode para centenas de sementes):
-   - `run_min + stopped_min + other_min ≤ duração da janela` (e `= cobertura × duração`).
-   - `tons ≥ 0`; `0 ≤ cobertura ≤ 1`; `mín ≤ média ≤ máx`.
-   - **Aditividade**: fato(`[a,c)`) = fato(`[a,b)`) + fato(`[b,c)`) para os campos aditivos (vale se o lookback é o mesmo).
-   - **Invariância**: embaralhar a ordem da entrada ou duplicar amostras não muda a saída.
-   - **Idempotência**: executar duas vezes dá o mesmo resultado.
-5. **Reconciliação com cálculo independente**: reimplemente de forma ingênua e diferente e compare dentro de tolerância. Exemplo, TWA por reamostragem a cada segundo:
-
-```js
-function twaBruteForce(samples, t0, t1, maxGapMs) {          // lento e simples, só para teste
-  let num = 0, den = 0;
-  for (let t = t0; t < t1; t += 1000) {
-    let cur = null;                                          // última amostra com s.t <= t
-    for (const s of samples) if (s.t <= t && (!cur || s.t >= cur.t)) cur = s;
-    if (cur && cur.q === 'good' && t - cur.t < maxGapMs) { num += cur.v; den++; }
-  }
-  return den ? num / den : null;
-}
-```
-   (Funciona com amostras em múltiplos de 1 s; para o resto, use tolerância.) Para produção, reconcilie também o fato contra o **bruto no banco**: `SUM(delta)` por consulta direta na fonte (ClickHouse/Postgres), em janela fechada, e contra a leitura do totalizador do equipamento.
-6. **Revisão de lógica (checklist para o `reviewer`)**: sem não determinismo; bordas `[t0, t1)`; recorte; teto de buraco; `null` em vez de 0; qualidade e sentinelas na spec; reset/rollover; unidade; idempotência; complexidade O(n); log curto.
+## 9. Testes (resumo; completo em `references/testes-da-logica.md`)
+Dourado à mão, uma borda por teste, gerador com semente, propriedades (aditividade, invariância, idempotência), reconciliação com cálculo independente e com o bruto.
 
 ## 10. Checklist: lógica pronta para ativar
 
@@ -279,36 +86,11 @@ function twaBruteForce(samples, t0, t1, maxGapMs) {          // lento e simples,
 - [ ] Catálogo de métricas atualizado (nome, definição, unidade, fonte, versão, limitações).
 - [ ] Testada no sandbox real da plataforma (12 casos da seção 11), simulada com dado real e com plano de recálculo e reversão.
 
-## 11. Lógica em sandbox: contrato típico, template e teste local
-
-Plataformas de curadoria impõem um desenho parecido; o contrato exato (nomes, limites, validação) vem do projeto (arquivo de base `team-state/<slug>/curadoria.md` ou skill de projeto) e **manda no formato**. Template comentado e genérico: `references/template-logica.js` (ajuste o bloco "AJUSTE AQUI" e confira a forma do `ctx` com o contrato).
-
-**Forma do módulo e do `ctx`**
-- Módulo ES com `export default function (ctx)`, **síncrono** (Promise/`async` falha), sem `import`, `require`, `process`, `fetch` nem timers. `Date.now()` e `Math.random()` existem, mas não use (seção 7): derive tempo só de `ctx.window` e dos `ts` dos itens.
-- `ctx` típico: `window {start, end}` ISO UTC (`[start, end)`, 1 hora); `items` da janela, ordenados; `prior` (último item de cada série antes da janela, até um prazo): **só ponto de partida**, nunca vira fato; `params` (JSON da versão); fuso e equipamentos do tenant; versão da lógica.
-- `ctx` costuma chegar **congelado em profundidade**: `ctx.items.sort()` lança erro. Copie antes de ordenar. Série do `prior` pode vir duplicada (troca de credencial/chave): fique com a de maior `ts`.
-- Cada execução usa um Isolate novo: nada persiste entre janelas, nem variável global.
-
-**Saída**
-- `{ facts: [{ entity, metric, periodStart, periodEnd, value, attributes }] }`. O host valida e **um único fato inválido derruba a janela inteira**: `metric` em snake_case (`^[a-z][a-z0-9_.]*$`), `value` finito (`NaN`/`Infinity` viram `null` no JSON), período ISO UTC com `Z` e **dentro da janela**, `attributes` objeto (`unit` sempre). Campo extra é descartado; o tenant é sempre o do job.
-- Não há chave única de fato: emita **um fato por (entity, metric, período)**. Período da janela inteira para agregados horários; subperíodo só para intervalo real (uma parada).
-- Pergunte ao contrato os **limites**: tamanho do código, da entrada e da saída com logs, nº de fatos, memória, tempo total, nº e tamanho de linhas de log (o excedente costuma ser ignorado em silêncio). Em produção o log pode nem ser gravado: só a simulação o mostra.
-
-**Estrutura do template (mantenha)**: agrupar `ctx.items` por entidade (filtrando `kind`) → colar o `prior` mais recente **só se estiver colado** na 1ª amostra (distância ≤ teto + folga) → filtrar qualidade **por chave**, com uma função única → totalizador por soma de deltas positivos (queda = reset: não soma, é contada) → estado com teto (`intervalo × fatorBuraco`) e recorte na janela → fatos só quando há dado, `attributes.unit` sempre, percentual junto de numerador e denominador → **uma linha de log por janela** com contadores.
-
-**Teste local**: rode no **sandbox real** da plataforma (mesmo `isolated-vm`, mesmos limites), não só em Node puro: Node não acusa `import`, `async`, `ctx` congelado nem período fora da janela. O teste é descartável e nunca vai para o repositório do produto. Casos obrigatórios, com número esperado calculado à mão:
-1. caminho feliz com `prior` colado; 2. janela vazia (e só `prior`): nenhum fato; 3. sem `prior` ou `prior` longe demais: não inventar o delta da fronteira; 4. reset/rollover: não soma, é contado; 5. buraco: o teto limita o tempo do estado; 6. qualidade: código ruim descartado, congelado aceito só onde a spec permite; 7. recorte: nenhum período fora da janela; 8. **reconciliação entre horas**: soma dos deltas de duas horas seguidas = último total − primeiro; 9. entradas hostis: item sem `values`, `kind` inesperado, `params` ausentes; 10. contrato: `async`, `import` e período fora da janela falham; 11. `Intl` com o fuso do tenant, se usa dia civil; 12. linha final gravada (`unit` em `attributes`).
-
-**Reconciliar antes de ativar**, contra fonte independente do mesmo período: (a) delta do totalizador = soma das toneladas das horas; (b) `min_rodando + min_parado` ≤ minutos com dado (nunca > 60 por hora e entidade); (c) disponibilidade = `rodando / (rodando + parado)`; (d) totais batem com relatório do equipamento ou do cliente. Divergência pequena e explicável (buraco, reset) vai nos `attributes`.
-
-**Ciclo de vida**: versão imutável e numerada (mudar = versão nova, `params` incluídos); escopo piloto (um cliente) antes do global; **simular com dado real** de 1 a 7 dias com buracos e paradas (período sem itens "passa" sem provar nada); ativar não recalcula (janelas antigas ficam na versão anterior até o recálculo explícito, e o painel mostra versões misturadas); falha de lógica deixa a janela falhada até versão nova ou recálculo; reversão por rollback para a versão anterior.
-
-## Fontes
-
-Definições de conhecimento consolidado; **não reverificadas online nesta sessão**. Confirme valores normativos antes de citá-los a cliente.
-- ISO 22400-2:2014, *Key performance indicators for manufacturing operations management* (disponibilidade, eficácia, OEE e taxa de qualidade).
-- Nakajima, S. *Introduction to TPM* (1988): origem do OEE e das seis grandes perdas.
-- IEC 60050-192 (Vocabulário Eletrotécnico Internacional, confiabilidade): MTBF, MTTR, disponibilidade.
-- OPC Foundation, *OPC UA Part 4* (StatusCode: Good/Uncertain/Bad) e *Part 13* (Aggregates: TimeAverage, Interpolative, Stepped, Start/End bound).
-- Documentação de historiadores de processo (ex.: AVEVA/OSIsoft PI, "time-weighted average") para a média ponderada no tempo com amostra de borda.
-- Modbus Application Protocol Specification V1.1b3 (registradores de 16 bits, base do rollover em 65536).
+## Referências (abrir só quando o gatilho ocorrer)
+- `references/agregacao-por-tipo.md`: ao escrever ou revisar o código de gauge, contador, estado ou evento.
+- `references/qualidade-e-tempo.md`: ao definir qualidade, sentinelas, janelas, atraso, fuso ou turno.
+- `references/camadas-e-indicadores.md`: ao fazer rollup, definir saída ou indicador de mineração/caldeira/pesagem.
+- `references/indicadores.md`: ao calcular disponibilidade, MTBF/MTTR, OEE e afins.
+- `references/testes-da-logica.md`: ao escrever testes, gerador ou reconciliação, ou revisar lógica.
+- `references/sandbox-contrato-e-template.md` (seção 11) e `references/template-logica.js`: ao escrever lógica para sandbox, simular ou ativar.
+- `references/fontes.md`: ao citar norma ou fonte a cliente.
