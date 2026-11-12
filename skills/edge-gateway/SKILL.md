@@ -5,7 +5,7 @@ description: "Software de gateway de borda que lê equipamentos industriais (Mod
 
 # Gateway de borda (leitura, store-and-forward e OTA)
 
-Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema da fila e exemplo de payload em `references/algoritmos.md`.
+Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema da fila e exemplo de payload em `references/algoritmos.md`. Conexão persistente, ciclo de leitura x registro, buffer e resumo da janela em `references/conexao-e-janela.md`.
 - Detalhes de Rust (async, erros, crates, build cruzado): skill `rust-standards`.
 - Transporte MQTT (QoS, tópicos, payload, LWT): skill `mqtt-contract`. Aqui o transporte padrão é HTTPS; as regras de idempotência e ordem valem para os dois.
 - Pacote de atualização offline de appliance: skill `appliance-offline-package`.
@@ -33,6 +33,7 @@ Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema 
   - ao sincronizar, corrige as leituras do **mesmo boot**: `ts = wall_sync − (mono_sync − mono_leitura)`;
   - leituras que não puderem ser corrigidas seguem com `timeOk: false`; o servidor usa `receivedAt` e a ordem do `seq`, e marca o dado;
   - em equipamento crítico, prefira RTC com bateria. No chrony, `makestep` permite saltar o relógio no início em vez de corrigir devagar.
+- **Conexão com o equipamento** (persistente x por leitura, ocioso, erro, backoff): `references/conexao-e-janela.md` §1.
 
 ## 2. Dado bruto × processado
 - **Toda leitura leva o bruto e o processado:** `raw` (valor decodificado do equipamento, antes de escala) e `v` (após escala, offset e unidade), mais `cfgRev`. Para contadores, também `total` (acumulado da borda) e `delta`.
@@ -52,6 +53,7 @@ Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema 
   - cada leitura leva o `cfgRev` usado;
   - no boot e a cada mudança, inclusive mudança feita na UI local, o gateway envia o **snapshot completo** da configuração; o servidor guarda por `(deviceId, cfgRev)`;
   - assim o servidor recalcula `v` a partir de `raw` quando uma escala estava errada, sem depender da borda.
+- **Ciclo de leitura x janela de registro, buffer e resumo da janela:** `references/conexao-e-janela.md` §2–3.
 
 ## 3. Store-and-forward
 - **Fluxo:** leitura → INSERT na fila local (transação) → envio em lote → resposta 2xx com ack → DELETE → próximo lote. A leitura **nunca** vai direto da memória para a rede.
@@ -156,6 +158,7 @@ Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema 
 13. Heartbeat traz versão, fila, último envio e erros por tag? Logs com rotação e sem segredo?
 14. Credencial por dispositivo, TLS verificado, UI local sem senha padrão e com falha fechada, unit systemd endurecida?
 15. Detalhes de linguagem conferidos contra `rust-standards` e, se houver MQTT, contra `mqtt-contract`?
+16. Conexão persistente por equipamento, reconexão + 1 retry só em erro de transporte, backoff, e ciclo de leitura separado da janela de registro?
 
 **Anti-padrões que reprovam o PR:** apagar da fila antes do ack; leitura direto da memória para a rede; primeira leitura após o boot como novo zero; deadband em contador; `synchronous=NORMAL` ou `OFF` na fila; retry sem jitter; intervalo medido com relógio de parede; campo obrigatório novo no contrato; "baixar sempre a última"; binário sem assinatura; TLS sem verificação; senha padrão na UI local; UI que abre sem autenticação quando a configuração falha.
 

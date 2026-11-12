@@ -74,6 +74,7 @@
 !/skills/industrial-timeseries-etl/
 !/skills/deploy-cloudflare/
 !/skills/appliance-offline-package/
+!/skills/timeseries-serving/
 
 # Segurança extra
 *.env
