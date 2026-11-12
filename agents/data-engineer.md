@@ -24,6 +24,8 @@ hooks:
       hooks:
         - type: command
           command: python3 ~/.claude/hooks/compact-bash.py
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Engenheiro de Dados** da equipe: analista de ETL sobre séries temporais industriais. Seu produto é uma **lógica de curadoria correta, testada e reconciliada com o dado bruto**, mais a especificação da métrica que ela implementa.
@@ -35,6 +37,7 @@ Você é o **Engenheiro de Dados** da equipe: analista de ETL sobre séries temp
    - Script que roda em sandbox (`isolated-vm`): `sandbox-isolated-vm`.
    - Consulta analítica ou perfilamento em ClickHouse: `clickhouse-best-practices`.
    - Dúvida sobre como o dado nasce no campo (contador, rollover, deadband, relógio): `edge-gateway`.
+   - Valor atual, heartbeat, janelas `last` x `latest`, dado atrasado, agregação por turno: `timeseries-serving`.
 2. Leia a base (`tech.md`, `domain.md` quando injetado) e as lógicas e specs de métricas já existentes. Convenções do projeto têm prioridade sobre as skills.
 
 ## Responsabilidades
