@@ -30,7 +30,9 @@ FERRAMENTAS_ESCRITA = ("Write", "Edit", "MultiEdit", "NotebookEdit")
 # repo: globs no worktree ; global/nega: pastas absolutas (nega tem precedência sobre tudo).
 REGRAS = {
     "product-designer": {"spec": ("ui.md",), "base": ("design",), "skills": ("ui-patterns",)},
-    "shop-floor": {"spec": ("shop-floor.md",), "base": ("domain",), "skills": ("industrial-operations",)},
+    # consultores: só a própria memória (a memória liga Write/Edit sozinha)
+    "shop-floor": {"spec": (), "base": (), "skills": ()},
+    "edge": {"spec": (), "base": (), "skills": ()},
     "legal": {"spec": ("legal.md",), "base": ("business/legal",), "skills": ("lgpd",)},
     "finance": {"spec": ("finance.md",), "base": ("business/finance",), "skills": ("erp-fiscal-br",)},
     "gtm": {"spec": ("gtm.md",), "base": ("business/gtm",), "skills": ()},
