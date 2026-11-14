@@ -27,7 +27,7 @@ POR_AGENTE = {
     "dba": ("tech.md", "structure.md", "domain.md"),
     "backend": ("tech.md", "structure.md"),
     "frontend": ("tech.md", "structure.md"),
-    "native": ("tech.md", "structure.md"),
+    "rust": ("tech.md", "structure.md"),
     "qa": ("tech.md", "structure.md"),
     "reviewer": ("product.md", "tech.md", "structure.md"),
     "docs": ("product.md", "tech.md", "structure.md"),
@@ -41,6 +41,8 @@ POR_AGENTE = {
     "gtm": ("product.md", "business.md", "progress.md"),
     "marketing": ("product.md", "business.md"),
     "data-analyst": ("product.md", "domain.md", "tech.md"),
+    "mining-process": ("product.md", "domain.md"),
+    "production-manager": ("product.md", "domain.md"),
     "skills-curator": ("tech.md",),
 }
 MAX_ARQUIVOS = 4  # por papel, em ordem de prioridade (o primeiro é o último a ser cortado)
@@ -163,7 +165,7 @@ def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL, linhas_resta
 
 
 # Agentes de código que recebem a linha de stack detectada.
-AGENTES_STACK = {"backend", "native", "qa", "reviewer", "frontend", "devops", "dba"}
+AGENTES_STACK = {"backend", "rust", "qa", "reviewer", "frontend", "devops", "dba"}
 IGNORAR_DIRS = {"node_modules", ".git", ".worktree", "vendor", "dist"}
 MAX_LEITURAS = 30  # teto de arquivos lidos na detecção
 SKILLS_DIR = pathlib.Path.home() / ".claude" / "skills"
@@ -269,7 +271,7 @@ def detectar_stack(cwd: str) -> str:
                     sks.append("security-node")
                 add(" + ".join(rotulos), d, *sks)
         if ler_pequeno(d / "Cargo.toml") is not None:
-            add("Rust", d, "rust-standards")
+            add("Rust", d, "rust-standards", "security-rust")
         pyproj = ler_pequeno(d / "pyproject.toml")
         try:
             reqs = sorted(d.glob("requirements*.txt"))[:3]

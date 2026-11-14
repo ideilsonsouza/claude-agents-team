@@ -38,7 +38,10 @@ REGRAS = {
     "gtm": {"spec": ("gtm.md",), "base": ("business/gtm",), "skills": ()},
     "marketing": {"spec": ("marketing.md",), "base": ("business/marketing",), "skills": (),
                   "repo": ("src/content/**/*.md", "src/content/**/*.json", "src/content/**/*.yaml")},
-    "data-analyst": {"spec": ("data-analyst.md",), "base": ("analytics",), "skills": ()},
+    # consultores de mineração: só leitura (sem Write/Edit nas tools; o guard é a segunda trava)
+    "mining-process": {"spec": (), "base": (), "skills": ()},
+    "production-manager": {"spec": (), "base": (), "skills": ()},
+    "data-analyst": {"spec": (), "base": (), "skills": ()},
     "skills-curator": {"spec": (), "base": (), "skills": "*",
                        "global": ("~/.claude/team-state/_skills",),
                        "nega": ("~/.claude/team-state/_skills/approved",)},
