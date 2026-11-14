@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: kpi-sem-definicao
+expected_outcome: |
+  Distingue disponibilidade ISO 22400-2 (tempo de produção real / tempo ocupado planejado) de disponibilidade física de mineração; explica taxa nominal no lugar de ciclo ideal em fluxo contínuo; denominador de t/h é tempo operando; lista perguntas à planta; marca a norma paga como fonte secundária.

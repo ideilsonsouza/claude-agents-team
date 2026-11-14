@@ -120,6 +120,7 @@ Padrão da equipe, genérico. Fontes ao fim. Pseudocódigo de contador, esquema 
 - Diagnóstico remoto só por comandos de lista fechada (reenviar configuração, coletar logs, forçar heartbeat). Sem shell remoto.
 
 ## 8. Segurança
+- Implementação em Rust (Argon2id, rate limit por IP, token, SSE, segredo mascarado, https, verificação minisign, systemd e `NoNewPrivileges` x `sudo`): `security-rust`. O que segue é o requisito, não o código.
 - **Credencial por dispositivo** (token ou certificado X.509 para mTLS), gerada no provisionamento e nunca compartilhada entre dispositivos; revogação individual no servidor.
   - **Rotação com sobreposição:** o servidor emite a nova, o dispositivo grava e usa, e a antiga só é revogada depois do primeiro uso da nova.
   - Arquivo `0600` do usuário do serviço; TPM ou *secure element* quando houver.

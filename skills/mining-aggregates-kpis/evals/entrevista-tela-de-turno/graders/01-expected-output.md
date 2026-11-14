@@ -1,0 +1,1 @@
+Responde nos blocos útil/falta/confunde/prioridades por público; separa fato com fonte de prática de campo e opinião; pede a definição de t/h e de utilização da planta; fala em cobertura de motivo de parada; não inventa metas nem faixas de t/h; não escreve código nem decide arquitetura.

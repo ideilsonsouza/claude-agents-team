@@ -9,7 +9,7 @@ Fontes verificadas em **23/10/2026**: OWASP Top 10:2025, ASVS 5.0, OWASP Cheat S
 nodejs.org, go.dev, docs.python.org, pnpm.io, RFC 9106/9954/10024, Comissão Europeia (CRA).
 Panorama completo da investigação: `references/panorama-2026.md`.
 
-**Carregue junto com a skill da linguagem:** `security-node`, `security-go` ou `security-python`.
+**Carregue junto com a skill da linguagem:** `security-node`, `security-go`, `security-python` ou `security-rust`.
 Cadeia de suprimentos e CI: `security-supply-chain`.
 Já tratado em outras skills — **não duplique aqui**:
 - API HTTP, authz (BOLA), JWT, CORS, rate limit, senha, SSRF: `backend-standards`;

@@ -1,0 +1,1 @@
+Pede período e fronteira iguais, umidade, reset/rollover do totalizador, soma de deltas positivos; separa deriva de zero (oscila) de span (sentido constante); cita teste de material contra balança de referência; não dá tolerância como regra (1 a 2% é prática de campo); marca ausência de portaria Inmetro específica como não verificado.

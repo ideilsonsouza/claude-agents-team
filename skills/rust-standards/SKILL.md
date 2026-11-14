@@ -166,6 +166,7 @@ PRAGMA journal_size_limit = 67108864;
 - Banco de teste em `tempfile::TempDir`, apagado no fim. Serviços externos seguem a regra de serviços locais do `CLAUDE.md`.
 
 ## Qualidade e segurança
+- Segurança do serviço (Argon2id, tempo constante, rate limit com `ConnectInfo`, token, SSE, segredo em config, https, instalador minisign, `deny.toml`, unit systemd): `security-rust`.
 - `cargo fmt --check` com `rustfmt.toml` mínimo (`style_edition = "2024"`); `cargo clippy --all-targets --all-features -- -D warnings` com o pedante seletivo do workspace.
 - **`cargo deny check`** no CI (advisories RustSec, licenças permitidas, crates banidos, duplicatas, fontes só do crates.io). `cargo audit` cobre só advisories: use-o se não houver `cargo-deny`. `cargo machete` aponta dependência sem uso.
 - `Cargo.lock` versionado (binário e biblioteca). Builds no CI com `--locked`.

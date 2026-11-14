@@ -75,6 +75,8 @@
 !/skills/deploy-cloudflare/
 !/skills/appliance-offline-package/
 !/skills/timeseries-serving/
+!/skills/mining-aggregates-kpis/
+!/skills/security-rust/
 
 # Segurança extra
 *.env

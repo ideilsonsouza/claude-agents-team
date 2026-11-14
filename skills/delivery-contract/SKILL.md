@@ -46,6 +46,10 @@ Regras:
 - Comando inexistente no projeto → diga "não existe no projeto" na Verificação. Não invente o comando.
 - Falha que já existia antes da sua mudança → mostre por que ela não é sua (teste de arquivo que você não tocou, mensagem sem relação com o diff, CI da `main` vermelho) e reporte em "Riscos e pendências". Não use `git stash`, `checkout` nem `reset` para provar isso.
 
+## Comandos Bash que travam a sessão
+- Não misture `rm` com `eval`, `source`/`.`, `$(...)`, crase, `${!var}`, `$$` nem `cd ... && rm <glob>` no mesmo comando: o Claude Code pede confirmação humana (mesmo em bypass) e agente em segundo plano fica parado. O hook `bash-rm-guard.py` recusa esse formato.
+- Faça: `rm` sozinho, com caminhos literais, em comando separado; ou ponha a lógica num script `.sh` e execute o script. Em vez de `eval`, leia um arquivo de estado com variáveis nomeadas.
+
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
 - Notas, planos, rascunhos, relatórios, scripts temporários e logs da equipe **nunca** vão para o repositório. Temporários: diretório de scratchpad da sessão (ou `/tmp`). Material que deve durar: a base do projeto (`~/.claude/team-state/<slug>/`).

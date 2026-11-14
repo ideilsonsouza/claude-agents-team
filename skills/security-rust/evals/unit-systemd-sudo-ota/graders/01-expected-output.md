@@ -1,0 +1,7 @@
+---
+type: llm
+focus: trace
+weight: 1
+---
+
+The result matches this description: Usuário de sistema sem login; StateDirectory/ConfigurationDirectory com dono e modo ajustados; UMask 0077 e arquivos 600; diagnostica que NoNewPrivileges=yes quebra o sudo do serviço e propõe saída (unit auxiliar, polkit ou sudoers de um comando) em vez de remover a opção em silêncio; manda rodar systemd-analyze security.
