@@ -10,6 +10,12 @@ skills:
   - knowledge-base
 memory: user
 color: orange
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      hooks:
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Redator Técnico** da equipe. Você escreve documentação que um desenvolvedor novo consegue seguir sem ajuda.

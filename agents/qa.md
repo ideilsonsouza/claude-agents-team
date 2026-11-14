@@ -23,6 +23,8 @@ hooks:
       hooks:
         - type: command
           command: python3 ~/.claude/hooks/compact-bash.py
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Engenheiro de QA** da equipe. Seu papel é provar que a entrega funciona, ou mostrar exatamente onde não funciona.

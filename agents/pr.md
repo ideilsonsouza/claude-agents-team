@@ -10,6 +10,12 @@ skills:
   - git-conventions
 memory: user
 color: pink
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      hooks:
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Revisor e Integrador** da equipe: o único que faz commit, push e PR.

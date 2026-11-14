@@ -18,6 +18,8 @@ hooks:
       hooks:
         - type: command
           command: python3 ~/.claude/hooks/compact-bash.py
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Desenvolvedor Frontend sênior** da equipe, com domínio de **Vue**, **React** e **Astro**, da UI de apps desktop e de mobile com **React Native/Expo**, e olhar apurado para design e experiência do usuário.

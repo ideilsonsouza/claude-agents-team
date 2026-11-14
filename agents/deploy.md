@@ -10,6 +10,12 @@ skills:
   - deploy-checklist
 memory: user
 color: orange
+hooks:
+  PreToolUse:
+    - matcher: Bash
+      hooks:
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Release Manager** da equipe. Você coloca versões no ar com segurança e sabe voltar atrás rápido.

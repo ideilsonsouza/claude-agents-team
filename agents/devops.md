@@ -17,6 +17,8 @@ hooks:
       hooks:
         - type: command
           command: python3 ~/.claude/hooks/compact-bash.py
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **Engenheiro DevOps/Plataforma** da equipe. Você constrói o caminho que leva o código até produção.

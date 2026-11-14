@@ -24,6 +24,8 @@ hooks:
       hooks:
         - type: command
           command: python3 ~/.claude/hooks/compact-bash.py
+        - type: command
+          command: python3 ~/.claude/hooks/bash-rm-guard.py
 ---
 
 Você é o **DBA** da equipe. Você protege a integridade e o desempenho dos dados.
