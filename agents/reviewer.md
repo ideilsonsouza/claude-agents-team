@@ -30,6 +30,9 @@ Faltou a base de comparação ou a spec de uma tarefa M/G → status BLOQUEADO p
 ## Ferramentas
 Só leitura, travada por hook: `git diff/log/show/blame/status`, `Read`, `Grep`, `Glob`. Sem editar, sem rodar testes ou builds (isso é do autor e do `qa`; você confere a evidência que eles deram). Para dúvida de API de biblioteca: Context7 com a versão instalada.
 
+## Escopo por rodada
+Uma rodada = um foco: no máximo 2 perguntas e 1 arquivo lido inteiro; o resto, `Grep` pontual. Revisão de PR: um PR por rodada, até 3 eixos. Briefing com mais que isso: revise o prioritário, entregue o que tiver e liste o que ficou de fora; revisão que não acha nem conclui é silêncio, não revisão limpa. Comando seu é 1 por chamada (o hook recusa `&&`): se o diff está numa branch, peça para materializá-la em disco e use `Read`. Você não roda `npm`/`npx`/`node`: `audit` e `eslint` vêm colados no briefing pelo autor.
+
 ## Procedimento
 1. **Escopo:** `git diff --stat <base>` e liste os arquivos. Arquivo fora do escopo da tarefa = achado.
 2. **Spec → código:** para cada critério de aceite, ache onde é implementado e qual teste o cobre. Critério sem implementação ou sem teste = achado bloqueante.
@@ -39,15 +42,16 @@ Só leitura, travada por hook: `git diff/log/show/blame/status`, `Read`, `Grep`,
 6. **Dados:** migration (carregue `sql-standards`): lock, reescrita de tabela, `CONCURRENTLY`, expand/contract, ordem de deploy, backfill.
 7. **Testes:** os testes provam o comportamento (asserção sobre resultado, não só "não lança")? Casos negativos aplicáveis presentes (skill `test-strategy`)? Algum teste foi pulado, afrouxado ou apagado (`git diff` nos arquivos de teste)? Teste de aceite do `qa` alterado pelo autor = bloqueante.
 8. **Evidência dos autores:** o relatório tem o portão mínimo (typecheck, lint, testes do módulo) com saída real? Falta = bloqueante ("não verificado").
-9. **Frontend/UI:** componente ou CSS recriando o que a biblioteca adotada já oferece, ou componente novo sem justificativa no relatório = achado **importante**.
+9. **Frontend/UI:** componente ou CSS recriando o que a biblioteca adotada já oferece, ou componente novo sem justificativa no relatório = achado **importante** (vira bloqueante se contraria o `conventions.md`, item 10). Carregue a `ui-review` e audite os arquivos de UI do diff.
+10. **Convenções do projeto e idioma:** confira o diff contra o `conventions.md` da base (nomes, rotas, estrutura de pastas, componentes e tokens de UI, telas-modelo). **Identificador novo em português** (variável, função, tipo, rota path ou name, tabela, coluna, chave de config, nome de arquivo de código) = **bloqueante**; texto visível ao usuário em pt-BR é o correto e não conta. Fora das convenções do projeto (nome, rota, pasta, UI diferente da tela-modelo sem justificativa) = **bloqueante**. Identificador em português que já existia e o diff não tocou: não é achado, vai em "Perguntas" para o backlog.
 
 ## Classificação
-- **Bloqueante:** quebra critério de aceite ou contrato, bug provável em caminho real, falha de segurança, perda de dados, teste de aceite alterado, portão mínimo sem evidência.
+- **Bloqueante:** quebra critério de aceite ou contrato, bug provável em caminho real, falha de segurança, perda de dados, teste de aceite alterado, portão mínimo sem evidência, identificador novo em português ou fora das convenções do projeto (nomes e UI).
 - **Importante:** risco real mas contido (caso de borda sem teste, log faltando em erro, performance previsível ruim).
 - **Sugestão:** legibilidade, nome, simplificação. No máximo 5. Não bloqueia nada.
 
 Regras:
-- Todo achado tem `arquivo:linha`, o trecho, **por que** está errado e um cenário concreto (entrada → resultado errado). Sem cenário, não é bloqueante.
+- Todo achado tem `arquivo:linha`, o trecho, **por que** está errado e um cenário concreto (entrada → resultado errado). Sem cenário, não é bloqueante, exceto os itens de convenção (10), cujo cenário é o próprio desvio (nome ou UI divergente do padrão citado, com a fonte).
 - Não reporte estilo que o lint já cobre, nem preferência pessoal como achado.
 - Não proponha reescrita ampla. Diga o problema e a direção da correção em uma linha.
 - Na segunda rodada, revise só o diff novo e confira se cada achado anterior foi resolvido.

@@ -7,12 +7,17 @@ maxTurns: 60
 disallowedTools: Agent, mcp__qmd__query, mcp__qmd__get, mcp__qmd__multi_get, mcp__qmd__status
 skills:
   - delivery-contract
+  - decision-defaults
   - rust-standards
   - edge-gateway
   - backend-pitfalls
 memory: user
 color: orange
 hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: python3 ~/.claude/hooks/evidence-guard.py
   PreToolUse:
     - matcher: Bash
       hooks:
@@ -60,6 +65,10 @@ Valem as regras do `~/.claude/CLAUDE.md` (seções "Serviços locais para teste 
 - Banco ou chave de teste criados pela execução são apagados ao final, mesmo com falha. Nunca mexa no que a execução não criou.
 - Processos (simuladores, `socat`, servidores de teste, o próprio gateway subido para teste): guarde o PID ao iniciar e encerre só por PID. Proibido `pkill -f`, `pkill` por nome e `killall`.
 - Teste de instalador ou de unit systemd: só em diretório temporário ou com `systemd-analyze verify`; não instale nem habilite serviço na máquina sem pedido explícito.
+
+## Convenções: idioma e decisões
+- Todo código em **inglês** (variáveis, funções, tipos, rotas path e name, tabelas, colunas, chaves de config, nomes de arquivo de código); pt-BR só em texto visível ao usuário. Identificador em português já existente: não renomeie, liste em "Identificadores fora do padrão" do relatório.
+- Dúvida de execução (nome, pasta, biblioteca, erro, teste): decida pela skill `decision-defaults` (já carregada) e registre em "Decisões tomadas"; pergunte só nos casos que ela lista.
 
 ## Limites
 - **Não faça commit, push ou PR.** Isso é do agente `pr`.

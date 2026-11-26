@@ -42,6 +42,9 @@ Além do critério de pronto, rode **sempre**, com os comandos do `tech.md` (ou,
 
 Regras:
 - Mudou comportamento e não criou nem alterou teste → status **PARCIAL**, com o motivo.
+- **Skip não é verde.** Rode com as variáveis do portão (banco, Redis, objeto, owner) nos pacotes tocados e nos que montam o que mudou: meta 0 SKIP; SKIP > 1 pede motivo no relatório (22 SKIP já esconderam 12 testes quebrados).
+- **Prova = o job inteiro do módulo pelo portão** (`portao.sh` ou o script do projeto), não só os pacotes tocados (guarda estática de outro pacote passa batida). FAIL só no portão: suspeite antes de recurso compartilhado (banco, porta, coluna UNIQUE) e de ambiente diferente do CI (superusuário x papéis reais, FORCE RLS) do que do código.
+- Portão com container de nome ou porta fixos roda um por vez: serialize com `flock` num arquivo de lock.
 - Não desligue, pule (`.skip`, `t.Skip`), afrouxe nem apague teste ou regra de lint para ficar verde. Teste que parece errado → BLOQUEADO, com a explicação.
 - Comando inexistente no projeto → diga "não existe no projeto" na Verificação. Não invente o comando.
 - Falha que já existia antes da sua mudança → mostre por que ela não é sua (teste de arquivo que você não tocou, mensagem sem relação com o diff, CI da `main` vermelho) e reporte em "Riscos e pendências". Não use `git stash`, `checkout` nem `reset` para provar isso.
@@ -49,6 +52,9 @@ Regras:
 ## Comandos Bash que travam a sessão
 - Não misture `rm` com `eval`, `source`/`.`, `$(...)`, crase, `${!var}`, `$$` nem `cd ... && rm <glob>` no mesmo comando: o Claude Code pede confirmação humana (mesmo em bypass) e agente em segundo plano fica parado. O hook `bash-rm-guard.py` recusa esse formato.
 - Faça: `rm` sozinho, com caminhos literais, em comando separado; ou ponha a lógica num script `.sh` e execute o script. Em vez de `eval`, leia um arquivo de estado com variáveis nomeadas.
+- Apague só pelo nome exato que você criou (guarde bancos, papéis, volumes e pastas temporárias), nunca por prefixo ou glob (`rm -rf /tmp/tmp.*`, `DROP` por prefixo): outras sessões usam a mesma máquina.
+- Espera sempre com teto (`timeout 900`, no máximo 160 s por chamada em laço de CI) e nada em segundo plano ao fim; antes do relatório, `pgrep -af '[s]leep|[u]ntil'` e encerre só o seu, por PID. O colchete evita casar com o próprio `pgrep`.
+- Prova ou variável que vale para várias fatias não fica no scratchpad (some no reboot): grave na base do projeto ou deixe recriável a partir dela.
 
 ## Higiene do repositório
 - No repositório entra **só o que é produto**: código, testes, configuração, README/documentação do projeto e, se a política de artefatos for "repositório", PRDs/ADRs.
@@ -73,12 +79,11 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - caminho/arquivo — criado | alterado | removido — motivo curto
 
 ## Verificação
-- Portão mínimo: typecheck · lint · testes do módulo — comando e resultado real de cada um (ex.: `pnpm vitest run src/orders` → 42 passed).
-- Critério de pronto: comando e resultado.
-- Se não rodou algo, diga "não verificado" e por quê.
+- Portão mínimo: typecheck · lint · testes do módulo e critério de pronto: **comando e saída real em bloco de código** (` ``` `), uma linha `$ comando` seguida da saída (as últimas linhas bastam). Texto solto ou inline não conta; o hook `evidence-guard.py` devolve o relatório sem bloco.
+- Se não rodou algo, diga "não verificado" e por quê (status PARCIAL).
 
 ## Limpeza
-- Criado pela execução → prova de remoção (comando + saída curta). Cobrir: worktree extra criada por você (não a worktree da tarefa, que o `pr` remove ao fechar; a do Orca nunca é removida), bancos `test_*`, chaves Redis, containers, artefatos de teste (`test-results`, `playwright-report`, `coverage`), temporários, processos (por PID). "Nada criado" se for o caso.
+- Criado pela execução → prova de remoção (comando + saída curta). Cobrir: worktree extra criada por você (não a worktree da tarefa, que o `pr` remove ao fechar; a do Orca nunca é removida), bancos `test_*`, chaves Redis, containers, artefatos de teste (`test-results`, `playwright-report`, `coverage`), temporários, processos (por PID). "Nada criado" se for o caso. Seção ausente ou vazia: o hook devolve o relatório.
 
 ## Decisões tomadas
 - Decisão — motivo. (Só as que o orchestrator ou o usuário precisam saber.)
@@ -90,6 +95,10 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 (Omita se não houver.) Só perguntas cuja resposta muda a entrega.
 | # | Para | Pergunta | Por que importa | Suposição adotada se não houver resposta | Bloqueia? |
 
+## Identificadores fora do padrão
+(Omita se não houver.) Identificador em português achado no projeto, que você não renomeou:
+| arquivo:linha | identificador atual | sugestão em inglês |
+
 ## Atualização da base
 - Insumo para a curadoria do `docs` (o orchestrator não grava arquivo por arquivo). O que muda: `progress.md` (estado atual), `decisions.md` (decisão nova, com fonte), `structure.md` (pasta/módulo novo), `tech.md` (dependência, comando, convenção), `backlog.md` (pendências). "Nenhuma" se não mudou nada.
 
@@ -97,7 +106,23 @@ CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase explicando.
 - Qual agente deveria agir a seguir e com qual objetivo.
 ```
 
+## Variante tarefa P (curta)
+Quando o briefing disser "tarefa P", entregue só isto (até ~12 linhas, fora a saída colada):
+```
+## Status
+CONCLUÍDO | PARCIAL | BLOQUEADO — uma frase.
+## O que mudou
+- arquivo — o que mudou (uma linha por arquivo).
+## Evidência
+(um bloco de código: `$ comando` e a saída real dos testes do módulo)
+## Limpeza
+Nada criado | o que criou e a prova de remoção.
+```
+Rode só os testes do módulo (não o portão inteiro). Decisão que o dono precisa saber, risco ou pergunta que muda a entrega: acrescente a seção correspondente do formato completo, só se houver. Mudança sensível (autenticação, autorização, tenant, migration, segredos, pagamento, fiscal, dado pessoal, integração externa) não é tarefa P: use o formato completo.
+
 Regras:
+- **Variável de ambiente nova ou alterada** (relatório, descrição do PR e resposta ao dono): `VAR=valor → app X (nome no painel ou variable do GitHub Actions), obrigatória ou opcional, padrão Y, exige Redeploy?`. O dono não deve adivinhar onde ela entra.
+- **Versão:** não altere versão (`package.json`, `Cargo.toml`, fixtures, binários) sem pedido do dono; o bump é uma tarefa própria de release.
 - **Limpeza obrigatória:** sem a seção "Limpeza" com prova, o status não pode ser CONCLUÍDO. Proibido `prune` de volumes (`docker volume prune`, `docker system prune --volumes`).
 - **Tamanho:** relatório de até ~25 linhas, fora as saídas coladas. Não descreva o que não mudou nem narre o processo.
 - **Fatias:** quem implementa a fatia roda os testes do módulo e cola a saída no relatório; `qa` e `reviewer` não rodam a cada fatia, só uma vez no fim da feature, sobre o diff inteiro. Exceção: revisão por fatia em mudança sensível (autenticação, autorização, tenant, migration, segredos, pagamento, fiscal, dado pessoal e integração externa).
@@ -107,6 +132,7 @@ Regras:
   | # | Resposta | Fonte (lei/artigo/link, arquivo:linha ou skill) | Confiança (alta/média/baixa) |
   Não crie arquivos nem faça perguntas de volta a quem perguntou; dúvida sua vai em "Riscos e pendências" para o usuário.
 - **legal e finance:** a primeira linha do relatório, antes de `## Status`, é `> Não é parecer jurídico. Validar com advogado.` ou `> Não é parecer contábil ou fiscal. Validar com contador.`
+- **Idioma do código:** todo código em inglês (variáveis, funções, tipos, rotas path e name, tabelas, colunas, chaves de config, nomes de arquivo de código); pt-BR só em texto visível ao usuário. Identificador em português já existente no projeto: não renomeie por conta própria, liste na seção "Identificadores fora do padrão". Dúvida de execução: decida pela skill `decision-defaults` e registre em "Decisões tomadas"; pergunta só nos casos dessa skill.
 - **Sigilo:** não transcreva contrato, preço ou dado de cliente no relatório, na base ou na memória; cite o caminho do documento.
 - **Nunca** declare sucesso sem evidência. Teste falhou → status PARCIAL e mostre a saída relevante.
 - Seja conciso: o relatório é para decisão, não para narrar o processo.
