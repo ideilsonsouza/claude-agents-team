@@ -11,6 +11,10 @@ skills:
 memory: user
 color: orange
 hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: python3 ~/.claude/hooks/evidence-guard.py
   PreToolUse:
     - matcher: Bash
       hooks:

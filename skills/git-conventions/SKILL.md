@@ -56,3 +56,6 @@ Sem rodapé de ferramenta (`Generated with ...`) na descrição do PR.
 
 ## Proibido sem autorização explícita
 `push --force`, `reset --hard` em branch compartilhada, merge na principal, apagar branch remota, reescrever histórico publicado.
+
+## Merge em lote
+Várias PRs na fila, CI remoto parado ou PR empilhado: `references/merge-em-lote.md` (prática de campo, não verificada em fonte oficial).

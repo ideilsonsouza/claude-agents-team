@@ -155,6 +155,12 @@ jobs:
 - Os runners hospedados não têm IP fixo, então a API do painel precisa estar acessível por HTTPS. Para fechar a rede, use VPN no job (ex.: Tailscale) ou runner self-hosted isolado.
 - Notifique falha com um step `if: failure()`.
 
+### Armadilhas de campo (prática de campo, sem fonte oficial)
+- **Molde:** em projeto novo, olhe primeiro os workflows de repos irmãos da mesma org e siga o molde.
+- Org no Free: secrets e variables de org não valem em repo privado (cadastre no repo); secret de environment não chega a workflow reutilizável sem `secrets:` no chamador.
+- Push sem nenhum run: `gh workflow list --all` e `gh api repos/<org>/<repo>/actions/workflows/<arq>.yml --jq .state` antes de culpar cobrança (já era `disabled_manually`; sem saldo o run morre em 2-3 s). Reative só a pedido.
+- Job que grava marca e roda só com mudança em certa pasta (smoke): ele também roda por `workflow_dispatch` contra imagem já publicada e usa `if: ${{ !cancelled() }}`, nunca `always()`. Peça o grafo de `if`/`needs` para push com e sem a pasta e para dispatch (só validação, validação+deploy, só deploy).
+
 ## 8. Segurança (obrigatório)
 - No topo do workflow, `permissions: { contents: read }`. Eleve por job: `packages: write`, `id-token: write` e `security-events: write` só onde for usado.
 - **Actions fixadas por SHA completo**, com comentário `# vX.Y.Z`. O Dependabot (`package-ecosystem: github-actions`) atualiza o SHA e o comentário.
