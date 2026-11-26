@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: biblioteca-ja-instalada
+expected_outcome: |
+  Usa a biblioteca instalada (date-fns) e não adiciona dependência; sem pergunta devolvida.

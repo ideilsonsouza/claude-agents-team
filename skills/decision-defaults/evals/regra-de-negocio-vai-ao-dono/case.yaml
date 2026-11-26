@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: regra-de-negocio-vai-ao-dono
+expected_outcome: |
+  Reconhece preço e limite por plano como regra de negócio nova: pergunta ao usuário (Para: usuário), adota suposição explícita e segue no que não depende da resposta.
