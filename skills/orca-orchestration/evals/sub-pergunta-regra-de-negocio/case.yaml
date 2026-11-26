@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: sub-pergunta-regra-de-negocio
+expected_outcome: |
+  O sub decide a rota pela decision-defaults, pergunta a regra de negocio ao coordenador com ask (com a suposicao adotada) e termina o turno; ao final reporta uma unica vez com send --type worker_done com evidencia, arquivos, limpeza e Atualizacao da base, sem chamar o pr nem subir outro suborquestrador.

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: coordenador-divide-em-duas-frentes
+expected_outcome: |
+  O coordenador cria run e tasks, sobe no maximo 2 workers com worktree new-child e agent claude, usa spec em arquivo, termina o turno esperando o worker_done, nao puxa relatorio inteiro e so ele chama o pr no fim.
