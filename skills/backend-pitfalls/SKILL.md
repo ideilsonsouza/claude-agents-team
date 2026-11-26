@@ -31,8 +31,12 @@ Específico de linguagem: `references/go.md` (pgx, River, chi, slog) e `referenc
 - **Varredura global** (job que percorre todas as linhas/tenants) precisa de lote com teto, métrica de pendente vencido e não pode depender de um índice ausente na FK (DELETE em pai sem índice na filha varre tudo).
 - Uma ordem "por nó" que falha de modo persistente e é re-reivindicada pelo mesmo nó segura a vez de todas as outras. Identidade da réplica (hostname) vazia ou repetida: trate o erro.
 
+- **Retry ou adiamento sem limite x varredura de órfãos:** os dois juntos geram impasse. Case o job com a entidade exata e prove que o adiamento não segura estado alheio. Ao fechar achado de concorrência, re-revise o diff da correção: as correções combinadas criam impasse, órfão ou laço?
+- **Worker com `isolated-vm` + BullMQ:** envelope de saída e logs como string primitiva dentro do Isolate, com o teto medido lá dentro; reenfileirar decide por `getJobState`, nunca por registro no banco; `completed` retido pede jobId versionado; réplicas x pool <= `CONNECTION LIMIT`, validado no boot. Peça teste ou mutação de cada um.
+
 ## 4. Autorização
 - **A rota nova é irmã de outra que já tem guarda?** Anti-escalada (não conceder papel acima do próprio, não mexer no dono) tem de valer em **toda** rota que concede papel: convite, aceite, adição de membro, troca de papel. Reusar só metade da checagem é o caso típico.
+- **Releitura sob trava de tudo o que o guard checa** (titular, status, vínculo), não só de um item; prove com mutação "resolver pela organização ativa".
 - **BOLA provada com vínculo real?** O teste "usuário A acessa recurso de B" precisa que A tenha sessão válida e vínculo real em outro tenant; sem vínculo o 403 vem de outra guarda e o teste não prova nada.
 - **A guarda está só no handler?** Serviço, job e função SQL chamados por outros caminhos precisam da própria checagem (ou o caminho alternativo fura).
 - Tenant vindo de duas fontes (cabeçalho validado, URL usada); filtro opcional que substitui o escopo; parâmetro `tenantID` recebido e não usado; upsert com `SET tenant_id = EXCLUDED.tenant_id` (troca o dono).
@@ -65,6 +69,8 @@ Específico de linguagem: `references/go.md` (pgx, River, chi, slog) e `referenc
 - "Segredo não está na auditoria" provado por busca numa tabela/coluna onde ele nunca estaria; procure também codificado (bytea, base64, hex).
 - Não monte comando de shell com credencial em variável; mascare saída.
 
+- **Rotação de chave ou migração de segredo:** `synchronous=FULL` e checkpoint antes de apagar a chave antiga; verifique o arquivo novo ANTES do COMMIT; nunca apague a chave após leitura falha; o unlock sempre verifica a credencial. Falha simulada por exceção não pega perda de WAL: revise cada rodada até 0 achados.
+
 ## 8. Data e fuso
 - **A regra usa data civil do negócio?** "Hoje", "fim do mês", "72 h" no fuso do negócio, calculados num único lugar; não reproduza a regra em SQL e em código com fusos diferentes.
 - **Teste com relógio fixo**, inclusive datas de borda (virada de mês, horário de verão). Teste que depende do dia em que roda passa hoje e falha amanhã — ou sobrevive ao mutante.
@@ -94,6 +100,8 @@ Pergunte de cada teste: **se eu apagar a linha que ele protege, ele fica vermelh
 - Reverter a imagem com o env novo reativa comportamento antigo (seed que redefine senha)? Pense no rollback.
 - Handler sem rota, ou rota legada que o design dizia "delegar ao novo" e não foi tocada.
 - Recurso de versão nova do banco/runtime usado onde a decisão disse que a versão de produção não está confirmada.
+
+- **Separar app, front ou serviço:** pergunte "o que continua compartilhado (cookie, sessão, CORS, redirect, WebSocket) e o que quebra no uso simultâneo?" e ponha critério de aceite de uso simultâneo (já houve login do portal e do admin se sobrescrevendo).
 
 ## Antes de entregar (resumo)
 1. Para cada guarda nova: existe teste que fica vermelho sem ela, pela mensagem certa?

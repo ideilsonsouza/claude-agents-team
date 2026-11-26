@@ -130,6 +130,8 @@ Em seguida, rode o smoke test (skill `cicd-github-actions` §7).
 ## 7. Armadilhas e issues abertas (out/2026)
 - **#8627**: o rolling update gera 502/503 de 18 a 31 s. Mitigação: no SIGTERM, o `/health` passa a falhar e o app espera alguns segundos antes de fechar o servidor.
 - #7942 (Caddy derruba websockets a cada restart), #3520 (scheduled task durante o redeploy), #11063 (Stop às vezes não para), #6579 (deploy preso em `queued`), #11890 (auto-update falha por rate limit do GHCR), #10642 (`$VAR` na tag).
+- **Antes do 1º deploy pela esteira:** peça ao dono um print da aba General (imagem e tag) e o domínio, e confira que a tag é a que a esteira move. Tag fixa antiga (`sha-<antigo>`) fez o Coolify responder "finished" em 22 s sem mudar a versão. Restart/Redeploy no painel faz novo pull da tag (prática de campo, 4.7.3).
+- **Docker Image não tem Start Command:** outro binário da mesma imagem entra por Custom Docker Options `--entrypoint=/caminho/binario`, e só **Redeploy** recria (Restart não). O texto cinza de exemplo parece preenchido: confirme. Variáveis copiadas da API podem trazer `PORT=80`: fixe `PORT` igual a "Ports Exposes", senão Cloudflare responde 502 (ou 526 em loop). Imagem distroless: Pre/Post-deployment vazios. Serviço permanente: prefira imagem própria com CMD certo.
 - No rolling update, as duas versões ficam no ar ao mesmo tempo por alguns instantes. Worker de fila: jobs idempotentes e contrato compatível com N-1 e N+1.
 - Preview de PR roda código do PR no servidor: nunca com credencial de produção, e só para membros do repo.
 

@@ -63,6 +63,12 @@ Todo endpoint novo com autenticação tem **pelo menos** os casos de BOLA e de t
 - IDs, datas e e-mails gerados, únicos por teste. Nunca dependa da ordem dos testes.
 - Use dados sintéticos e nunca uma cópia de produção.
 
+- Teste com serviço real usa credencial e identificador obtidos pelo caminho da produção (fluxo de emissão real), não montando os dois lados; achado de contrato pede varredura de todas as chamadas entre serviços.
+- QA de várias issues: suíte da API (ambiente descrito: dono do schema com SUPERUSER/BYPASSRLS, papel da app sem privilégio) separada do navegador, em lote pequeno e com dados simulados reais (tela vazia não prova layout).
+
+## 5b. Implementar e provar separados (fatia com banco, fila ou concorrência)
+Rodada 1 implementa, roda uma vez e lista os alvos de mutação com `arquivo:linha`; rodada 2 só roda as passadas e as mutações (trocar `DESC` por `ASC`, tirar `FOR UPDATE`). Junto, a prova estourou o teto de 60 chamadas; separado cabe e acha lacunas. Teste de aceite que parece errado: o autor não corrige, prova com `arquivo:linha` e a regra que contradiz; uma implementação descartável com mutações mostra que os testes são satisfazíveis.
+
 ## 6. Testes instáveis (flaky)
 
 - Teste que falha sem mudança de código é defeito do teste. Investigue antes de re-rodar.
