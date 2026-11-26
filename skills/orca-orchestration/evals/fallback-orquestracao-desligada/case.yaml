@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: fallback-orquestracao-desligada
+expected_outcome: |
+  O coordenador nao tenta contornar. Entrega ao dono um prompt inicial autossuficiente do suborquestrador para colar num pane do Orca, explica o uso de SendMessage entre sessoes e avisa que o dono pode ligar o Experimental em Settings.

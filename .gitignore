@@ -21,6 +21,7 @@
 !/hooks/reviewer-guard.py
 !/hooks/team_base.py
 !/hooks/domain-guard.py
+!/hooks/orchestrator-bash-guard.py
 
 # Skills: só as escritas pela equipe (terceiros e as específicas de produto ficam fora)
 /skills/*
@@ -78,6 +79,7 @@
 !/skills/mining-aggregates-kpis/
 !/skills/security-rust/
 !/skills/decision-defaults/
+!/skills/orca-orchestration/
 
 # Segurança extra
 *.env

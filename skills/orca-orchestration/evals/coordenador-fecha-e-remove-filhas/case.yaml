@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: coordenador-fecha-e-remove-filhas
+expected_outcome: |
+  O coordenador libera os workers, chama o pr (so ele) com a lista das worktrees filhas do tasks.md para remover com o comando de worktree rm do Orca, sem --force e sem --delete-branch, e deixa explicito que a worktree do dono nao entra na lista nem e removida; ele mesmo nao remove worktree.
