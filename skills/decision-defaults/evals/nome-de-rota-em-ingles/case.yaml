@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: nome-de-rota-em-ingles
+expected_outcome: |
+  Decide sozinho: rota, handler e colunas em inglês; mensagens ao usuário em pt-BR; registra em Decisões tomadas com o nível default; não pergunta ao orchestrator.

@@ -21,13 +21,13 @@ Na dúvida entre dois tamanhos, escolha o maior. Fiscal, pagamento, dado pessoal
 `<pasta de specs>/<AAAA-MM-DD>-<feature>/`, onde a pasta segue a política de artefatos do `structure.md`: `internal` → `<base>/specs/`; `repo` → `docs/specs/`. Entregue → mover para `specs/_archive/`.
 
 ## Portões (tamanho G)
-1. `requirements.md` pronto → **validação de domínio** (abaixo) → **usuário aprova** → segue.
-2. `design.md` (e `ui.md`, se houver tela) pronto → **usuário aprova** → segue.
+1. `requirements.md` (e `ui.md`, se houver tela) prontos → **validação de domínio** (abaixo) → **o dono aprova os dois juntos, uma única vez** → segue. O que ele aprova é o que o produto faz e como aparece.
+2. `design.md` pronto → o orchestrator confere contra os requisitos e segue, sem pedir aprovação do dono (decisão técnica é do orchestrator e do `architect`; a decisão vai ao `decisions.md`). O dono só entra se o design exigir regra de negócio nova, ação irreversível, tema jurídico/fiscal ou produção.
 3. `tasks.md` pronto → execução.
 4. Tarefa marcada `[jurídico]` ou `[fiscal]` só fecha com a validação profissional registrada pelo usuário ("validado por <profissional> em <data>" no chat).
 
 **Validação de domínio (antes de aprovar o `requirements.md`, tamanho G):** se os requisitos tocam regra de domínio (chão de fábrica, fiscal, jurídico, LGPD), o orchestrator consulta o especialista pelos gatilhos da seção "Consulta a especialistas" e anexa as respostas e a fonte ao pedido de aprovação. Termos e fórmulas conferem com o `domain.md`; divergência ou dúvida sem resposta vai a "Perguntas em aberto". Agente de domínio que ainda não existe: o usuário valida direto. Pontos `[jurídico]`/`[fiscal]` não ficam aprovados por si só: dependem da validação profissional do portão 4.
-Mudou requisito, design ou ui.md no meio? Atualize o documento e peça nova aprovação antes de mexer no código.
+Mudou requisito ou `ui.md` no meio? Atualize o documento e peça nova aprovação do dono antes de mexer no código. Mudou o `design.md`? Atualize e registre a decisão; nova aprovação só nos casos do portão 2.
 
 ---
 
@@ -90,7 +90,7 @@ Um flowchart Mermaid por história (H1…).
 | CA | Tela/estado |
 ```
 
-Regras: sem tokens, componentes nem CSS (são do `frontend`). Dado que a tela precisa e o contrato não prevê vira pergunta ao `architect`, não campo inventado. Todo CA aponta para uma tela ou fluxo. Vai junto com o `design.md` no portão 2.
+Regras: sem tokens, componentes nem CSS (são do `frontend`). Dado que a tela precisa e o contrato não prevê vira pergunta ao `architect`, não campo inventado. Todo CA aponta para uma tela ou fluxo. Vai junto com o `requirements.md` no portão 1 (aprovação única do dono).
 
 ---
 
@@ -147,6 +147,22 @@ Spec: requirements.md · design.md (ou "tamanho M: sem spec")
 **Teste antes:** em G com mudança de comportamento, a primeira tarefa é do `qa`. Ele escreve os testes de aceite e mostra que falham pelo motivo certo, e a implementação tem como critério de pronto deixá-los verdes sem alterar o teste. Em M, o `qa` valida no fim. Pule (anotando o motivo) em spike, protótipo, mudança só visual ou só de infra.
 
 Status: `pendente` · `em andamento` · `concluída` · `devolvida (n)` · `bloqueada`.
+
+### Briefing padrão (todo briefing a especialista segue este modelo)
+O especialista não vê a conversa e não deve devolver pergunta: o briefing traz tudo o que a decisão precisa. Campo sem conteúdo vira "nenhum", nunca é omitido.
+```
+Tipo: P | M | G (P: relatório curto da variante P do delivery-contract; sem reviewer/qa salvo mudança sensível)
+Objetivo: <resultado observável, 1-2 frases>
+Projeto/worktree: <caminho absoluto> · branch <nome> · base <ref>
+Ler: <arquivos exatos (e trechos de spec/design/CA com ID)>  Alterar: <arquivos exatos>
+Conventions: <trecho do conventions.md: idioma dos identificadores, rotas, pastas, componentes/tokens de UI, tela-modelo>
+Pronto quando: <comando(s) e resultado esperado; portão mínimo; CA cobertos>
+Fora do escopo: <o que não tocar; "não altere a versão"; sem ideia extra>
+Decisões já tomadas: <D-xx ou decisão do orchestrator, com fonte; o que não reabrir>
+Quem decide: técnico e de execução = você, pela decision-defaults (registre em "Decisões tomadas"); ao dono só regra de negócio nova, ação irreversível, jurídico/fiscal, merge/deploy/produção e objetivo ausente.
+Teto: pare em ~25-30 chamadas e relate o que tiver. Ambiente: <serviços e variáveis; confirme no ambiente, a base é retrato antigo>.
+```
+Fatos no briefing vêm de arquivo lido: o que o orchestrator não leu vai como "derive da seção X e cite arquivo:linha". Uma frente por chamada; acima de metade do teto, divida em chamadas sequenciais. Reviewer: um foco por rodada, arquivos nominais, um PR por rodada. Briefing do `pr` pede esperar o CI com um comando que repete internamente (até ~160 s) e terminar sem nada em segundo plano. Resposta de dúvida que a `decision-defaults` já resolve não é pergunta: devolva "decida e registre".
 
 ### Definition of Ready (antes de delegar)
 Dono único · objetivo claro · arquivos identificados · dependências concluídas · critério de pronto verificável.

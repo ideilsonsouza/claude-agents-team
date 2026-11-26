@@ -24,17 +24,18 @@ STEERING = ("product.md", "tech.md", "structure.md")
 POR_AGENTE = {
     "architect": ("product.md", "tech.md", "structure.md", "decisions.md"),
     "prd": ("product.md", "progress.md", "domain.md", "decisions.md"),
-    "dba": ("tech.md", "structure.md", "domain.md"),
-    "backend": ("tech.md", "structure.md"),
-    "frontend": ("tech.md", "structure.md"),
-    "rust": ("tech.md", "structure.md"),
-    "qa": ("tech.md", "structure.md"),
-    "reviewer": ("product.md", "tech.md", "structure.md"),
-    "docs": ("product.md", "tech.md", "structure.md"),
+    "dba": ("tech.md", "conventions.md", "structure.md", "domain.md"),
+    "supabase": ("tech.md", "conventions.md", "structure.md", "domain.md"),
+    "backend": ("tech.md", "conventions.md", "structure.md"),
+    "frontend": ("tech.md", "conventions.md", "structure.md"),
+    "rust": ("tech.md", "conventions.md", "structure.md"),
+    "qa": ("tech.md", "conventions.md", "structure.md"),
+    "reviewer": ("product.md", "tech.md", "conventions.md", "structure.md"),
+    "docs": ("product.md", "tech.md", "structure.md", "conventions.md"),
     "pr": ("tech.md",),
-    "devops": ("tech.md", "structure.md"),
+    "devops": ("tech.md", "conventions.md", "structure.md"),
     "deploy": ("tech.md",),
-    "product-designer": ("product.md", "domain.md", "structure.md"),
+    "product-designer": ("product.md", "conventions.md", "domain.md", "structure.md"),
     "shop-floor": ("product.md", "domain.md"),
     "legal": ("product.md", "business.md"),
     "finance": ("product.md", "business.md", "domain.md"),
@@ -165,7 +166,7 @@ def secoes(base: pathlib.Path, nomes, restante: int = LIMITE_TOTAL, linhas_resta
 
 
 # Agentes de código que recebem a linha de stack detectada.
-AGENTES_STACK = {"backend", "rust", "qa", "reviewer", "frontend", "devops", "dba"}
+AGENTES_STACK = {"backend", "rust", "qa", "reviewer", "frontend", "devops", "dba", "supabase"}
 IGNORAR_DIRS = {"node_modules", ".git", ".worktree", "vendor", "dist"}
 MAX_LEITURAS = 30  # teto de arquivos lidos na detecção
 SKILLS_DIR = pathlib.Path.home() / ".claude" / "skills"
@@ -174,6 +175,7 @@ DEPS_NODE = (  # (dependência, rótulo, skill)
     ("bullmq", "BullMQ", "backend-bullmq"), ("drizzle-orm", "Drizzle", "backend-drizzle"),
     ("mqtt", "MQTT.js", "backend-fastify-mqtt"), ("vue", "Vue", "frontend-vue"),
     ("react", "React", "frontend-react"), ("astro", "Astro", "frontend-astro"),
+    ("@supabase/supabase-js", "Supabase", "supabase"), ("@supabase/ssr", "Supabase", "supabase"),
 )
 BACKEND_NODE = {"backend-fastify", "backend-adonisjs", "backend-bullmq", "backend-drizzle", "backend-fastify-mqtt"}
 
@@ -243,6 +245,7 @@ def detectar_stack(cwd: str) -> str:
         skills.extend(nomes)
 
     for d in _dirs_candidatos(raiz):
+        supabase_aqui = False
         if (t := ler_pequeno(d / "go.mod")) is not None:
             m = re.search(r"^go\s+(\d+(?:\.\d+)*)", t, re.M)
             add(f"Go {m.group(1)}" if m else "Go", d, "backend-go", "security-go")
@@ -259,6 +262,11 @@ def detectar_stack(cwd: str) -> str:
             except (ValueError, TypeError):
                 deps = {}
             achados = [(r, sk, deps[dep]) for dep, r, sk in DEPS_NODE if dep in deps]
+            # supabase-js e ssr juntos viram um só rótulo "Supabase"
+            if sum(1 for a in achados if a[0] == "Supabase") > 1:
+                primeiro = next(a for a in achados if a[0] == "Supabase")
+                achados = [a for a in achados if a[0] != "Supabase"] + [primeiro]
+            supabase_aqui = any(r == "Supabase" for r, _, _ in achados)
             if achados:
                 rotulos = []
                 for r, _, ver in achados:
@@ -270,6 +278,8 @@ def detectar_stack(cwd: str) -> str:
                 if BACKEND_NODE & set(sks):
                     sks.append("security-node")
                 add(" + ".join(rotulos), d, *sks)
+        if not supabase_aqui and (d / "supabase" / "config.toml").is_file():
+            add("Supabase", d, "supabase")
         if ler_pequeno(d / "Cargo.toml") is not None:
             add("Rust", d, "rust-standards", "security-rust")
         pyproj = ler_pequeno(d / "pyproject.toml")
@@ -327,7 +337,7 @@ def montar(dados: dict) -> tuple[str, str] | None:
                               f"(skill `knowledge-base`), gravando em {base}.")
             else:
                 ordem = (*STEERING, "progress.md", "decisions.md", "backlog.md")
-                extras = [str(base / n) for n in ("domain.md", "business.md") if (base / n).exists()]
+                extras = [str(base / n) for n in ("conventions.md", "domain.md", "business.md") if (base / n).exists()]
                 linha = ("Existem também (leia sob demanda): " + ", ".join(extras)) if extras else ""
                 partes += secoes(base, ordem, LIMITE_TOTAL - len(cabecalho) - len(linha) - 4,
                                  LINHAS_TOTAL - cabecalho.count("\n") - 4)
@@ -335,7 +345,7 @@ def montar(dados: dict) -> tuple[str, str] | None:
                     partes.append(linha)
         else:
             intro = (cabecalho + "\nUse estes arquivos antes de explorar o código. Outros arquivos da base "
-                     "(product, tech, structure, domain, business, progress, decisions, backlog e as pastas domain/, business/, "
+                     "(product, tech, structure, conventions, domain, business, progress, decisions, backlog e as pastas domain/, business/, "
                      "design/, analytics/, specs/) estão no caminho acima — leia só se o briefing não bastar.")
             nomes_ag = POR_AGENTE[agente][:MAX_ARQUIVOS]
             corpo = secoes(base, nomes_ag, LIMITE_TOTAL - len(intro) - 2, LINHAS_TOTAL - intro.count("\n") - 2)
